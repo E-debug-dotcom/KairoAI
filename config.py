@@ -30,6 +30,10 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./ai_system.db"
     MAX_STORED_RESULTS: int = 1000          # auto-prune after this
 
+    # ─── Vector Memory ────────────────────────────────────────────────────────
+    VECTOR_DB_PATH: str = "./vector_db"
+    VECTOR_COLLECTION_NAME: str = "kairo_memory"
+
     # ─── Logging ───────────────────────────────────────────────────────────────
     LOG_LEVEL: str = "INFO"
     LOG_FILE: str = "logs/ai_system.log"
