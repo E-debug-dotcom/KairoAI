@@ -1,7 +1,7 @@
-# LocalAI System
+# KairoAI — Teachable Local AI Assistant
 
 A modular, production-ready local AI system powered by Ollama (Mistral / LLaMA 3).
-Handles multiple task types through a unified FastAPI interface.
+Now extended into a general-purpose, teachable assistant with conversational memory via Chroma vector storage.
 
 ---
 
@@ -26,6 +26,7 @@ See `ARCHITECTURE.md` for the full diagram.
 | Job Application | `/api/v1/job` | question, screening |
 | Code Generation | `/api/v1/code` | generate, review, explain |
 | Generic Dispatcher | `/api/v1/task` | any of the above via task_type |
+| Learning / Memory | `/api/v1/learn` | teach_text, teach_document, search |
 
 ---
 
@@ -134,6 +135,42 @@ curl -X POST http://localhost:8000/api/v1/resume/optimize \
 curl -X POST http://localhost:8000/api/v1/resume/optimize/upload \
   -F "resume_file=@resume.pdf" \
   -F "job_description=Senior IT Specialist role requiring Azure AD..."
+```
+
+
+### Teach the assistant with new knowledge
+
+```bash
+curl -X POST http://localhost:8000/api/v1/learn/text \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "IAM onboarding workflow: ticket -> manager approval -> RBAC role assignment -> access validation",
+    "source": "iam_playbook",
+    "category": "iam",
+    "tags": ["onboarding", "rbac"]
+  }'
+```
+
+### Ask memory-grounded chat questions
+
+```bash
+curl -X POST http://localhost:8000/api/v1/assistant/chat \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "What is our IAM onboarding process?",
+    "session_id": "demo-user-1",
+    "category": "iam",
+    "top_k": 4
+  }'
+```
+
+### Ingest a document as knowledge
+
+```bash
+curl -X POST http://localhost:8000/api/v1/learn/upload \
+  -F "file=@security_runbook.pdf" \
+  -F "category=security" \
+  -F "tags=iam,least-privilege,incident-response"
 ```
 
 ### Generate a PowerShell script
