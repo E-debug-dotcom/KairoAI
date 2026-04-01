@@ -170,10 +170,7 @@ class AssistantHandler:
         )
 
         start = time.time()
-        try:
-            answer = llm_service.complete(prompt=prompt, system_prompt=ASSISTANT_SYSTEM_PROMPT)
-        except Exception as e:
-            return formatter.error("assistant", f"LLM request failed: {str(e)}")
+        answer = llm_service.complete(prompt=prompt, system_prompt=ASSISTANT_SYSTEM_PROMPT)
         duration = time.time() - start
 
         db.save_task(
