@@ -104,6 +104,23 @@ ReDoc: `http://localhost:8000/api/v1/redoc`
 
 ## Quick Start Examples
 
+
+### Run interactive web UI (Streamlit)
+
+In a second terminal (with backend running):
+
+```bash
+streamlit run ui/app.py
+```
+
+Optional custom backend URL:
+
+```bash
+KAIRO_API_BASE_URL=http://localhost:8000 streamlit run ui/app.py
+```
+
+UI default: `http://localhost:8501`
+
 ### Health check
 
 ```bash
