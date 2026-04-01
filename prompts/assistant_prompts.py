@@ -44,6 +44,23 @@ Requirements:
 - If applicable, include a simple code snippet or command
 """
 
+
+
+ASSISTANT_CHAT_TEMPLATE = """\
+You are assisting in an interactive multi-domain conversation.
+
+USER MESSAGE:
+{message}
+
+RETRIEVED MEMORY (can be empty):
+{memory_block}
+
+Instructions:
+- Use retrieved memory when relevant, but do not hallucinate facts not present.
+- If memory is insufficient, state what is missing and provide best-effort guidance.
+- Keep answers practical and structured.
+"""
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # JOB APPLICATION MODULE
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -163,6 +180,7 @@ Provide:
 def register_assistant_prompts():
     prompt_manager.register("assistant", "query", ASSISTANT_QUERY_TEMPLATE)
     prompt_manager.register("assistant", "explain", ASSISTANT_EXPLAIN_TEMPLATE)
+    prompt_manager.register("assistant", "chat", ASSISTANT_CHAT_TEMPLATE)
 
 
 def register_job_app_prompts():
