@@ -1,0 +1,209 @@
+{
+  "_comment": "Example requests and responses for all endpoints. Use these with curl, Postman, or the Swagger UI at /api/v1/docs",
+
+  "examples": {
+
+    "1_generic_task_assistant": {
+      "description": "Generic /task endpoint — routes to assistant module",
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/v1/task/",
+        "body": {
+          "task_type": "assistant",
+          "sub_task": "query",
+          "payload": {
+            "question": "How do I find all failed login attempts in Windows Event Viewer using PowerShell?",
+            "context": "Windows Server 2022, domain environment with 300 users"
+          }
+        }
+      },
+      "response": {
+        "status": "success",
+        "task_type": "assistant",
+        "timestamp": "2025-01-15T10:30:00Z",
+        "data": {
+          "answer": "To find failed login attempts using PowerShell:\n\n```powershell\nGet-WinEvent -LogName Security -FilterHashtable @{\n  LogName = 'Security'\n  Id = 4625\n} | Select-Object TimeCreated, Message | Export-Csv failed_logins.csv\n```\n\nEvent ID 4625 is the Windows failed logon event. You can also filter by time range...",
+          "question": "How do I find all failed login attempts in Windows Event Viewer using PowerShell?"
+        },
+        "meta": { "duration_seconds": 4.2, "model": "mistral" },
+        "warnings": [],
+        "error": null
+      }
+    },
+
+    "2_resume_optimize_text": {
+      "description": "Optimize resume against a job description (text input)",
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/v1/resume/optimize",
+        "body": {
+          "resume_text": "John Smith | john@email.com\n\nEXPERIENCE\nIT Analyst - Transportation Investment Corp (2025-present)\n- Managed Active Directory for 300 users\n- Wrote Python scripts for automation\n- Supported Microsoft 365 environment\n\nEDUCATION\nBSc Computing Science - University of Fraser Valley (2025)",
+          "job_description": "We are seeking a Senior IT Specialist with experience in Active Directory, Azure AD, Microsoft 365, PowerShell scripting, and IAM. Must have strong troubleshooting skills and experience supporting 200+ users. Experience with SharePoint Online is a plus. ISO 27001 knowledge preferred."
+        }
+      },
+      "response": {
+        "status": "success",
+        "task_type": "resume",
+        "timestamp": "2025-01-15T10:35:00Z",
+        "data": {
+          "optimized_resume": "OPTIMIZED EXPERIENCE:\n\nIT Technical Analyst | Transportation Investment Corporation (Jan 2025 - Present)\n• Administered Active Directory and IAM policies for 300+ users, reducing provisioning time by 40% through automated onboarding workflows\n• Developed Python automation scripts that reduced incident response time by 92%, streamlining repetitive IT operations across the M365 environment\n• Administered Microsoft 365 suite including Exchange Online, Teams, and SharePoint Online for enterprise-level support...\n\nKEY IMPROVEMENTS:\n• Quantified user base and automation impact using existing data\n• Added SharePoint Online reference to match JD keyword\n\nATS KEYWORDS ADDED: Azure AD, SharePoint Online, IAM, PowerShell\n\nWARNINGS:\n• 'ISO 27001' not incorporated — you have an ISO/IEC 27001:2022 Lead Auditor cert; add it to your certifications section manually",
+          "analysis": {
+            "similarity_score": 0.71,
+            "keyword_match_score": 0.68,
+            "missing_keywords": ["azure ad", "powershell", "sharepoint online"],
+            "matched_keywords": ["active directory", "microsoft 365", "python", "automation"],
+            "total_jd_keywords": 18
+          }
+        },
+        "meta": { "duration_seconds": 12.4, "model": "mistral" },
+        "warnings": [],
+        "error": null
+      }
+    },
+
+    "3_resume_analyze": {
+      "description": "Score and analyze resume vs job description",
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/v1/resume/analyze",
+        "body": {
+          "resume_text": "...",
+          "job_description": "..."
+        }
+      },
+      "response": {
+        "status": "success",
+        "task_type": "resume",
+        "timestamp": "2025-01-15T10:36:00Z",
+        "data": {
+          "scores": {
+            "cosine_similarity": 0.68,
+            "keyword_match": 0.61
+          },
+          "keywords": {
+            "matched": ["active directory", "microsoft 365", "python", "automation", "troubleshooting"],
+            "missing": ["azure ad", "sharepoint online", "powershell", "iam governance"],
+            "total_in_jd": 22
+          },
+          "narrative_analysis": "STRENGTHS:\n1. Strong alignment on Active Directory and M365 experience...\nGAPS:\n1. No explicit PowerShell experience listed despite Python skills...\nRECOMMENDATIONS:\n1. Add a 'Technical Skills' section listing PowerShell explicitly..."
+        },
+        "meta": {},
+        "warnings": [],
+        "error": null
+      }
+    },
+
+    "4_cover_letter": {
+      "description": "Generate a tailored cover letter",
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/v1/resume/cover-letter",
+        "body": {
+          "resume_text": "...",
+          "job_description": "...",
+          "company_name": "Eastside Christian School",
+          "role_title": "Technology Coordinator"
+        }
+      },
+      "response": {
+        "status": "success",
+        "task_type": "resume",
+        "data": {
+          "cover_letter": "Dear Hiring Manager,\n\nManaging IT infrastructure while building the next generation of tech-literate students is not a common combination — but it is exactly what I have been doing across two years of technical support and training at Transportation Investment Corporation...",
+          "company_name": "Eastside Christian School",
+          "role_title": "Technology Coordinator",
+          "application_id": 3
+        }
+      }
+    },
+
+    "5_code_generate": {
+      "description": "Generate a PowerShell script",
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/v1/code/generate",
+        "body": {
+          "task_description": "Find all Active Directory accounts inactive for 90+ days and export to CSV with username, last logon date, and department",
+          "language": "powershell",
+          "requirements": [
+            "Accept output path as a parameter with a default value",
+            "Include error handling with try/catch",
+            "Log results to a .log file alongside the CSV",
+            "Exclude service accounts (accounts with 'svc_' prefix)"
+          ]
+        }
+      },
+      "response": {
+        "status": "success",
+        "task_type": "code",
+        "data": {
+          "code": "<#\n.SYNOPSIS\n    Exports inactive AD accounts to CSV.\n.PARAMETER OutputPath\n    Path for the output CSV file. Default: ./inactive_accounts.csv\n#>\n[CmdletBinding()]\nparam(\n    [string]$OutputPath = './inactive_accounts.csv'\n)\n\nSet-StrictMode -Version Latest\n$ErrorActionPreference = 'Stop'\n\n$logPath = [System.IO.Path]::ChangeExtension($OutputPath, '.log')\n$cutoffDate = (Get-Date).AddDays(-90)\n\ntry {\n    $inactive = Get-ADUser -Filter {Enabled -eq $true} -Properties LastLogonDate, Department |\n        Where-Object {\n            $_.LastLogonDate -lt $cutoffDate -and\n            $_.SamAccountName -notlike 'svc_*'\n        } |\n        Select-Object SamAccountName, LastLogonDate, Department\n\n    $inactive | Export-Csv -Path $OutputPath -NoTypeInformation\n    \"$(Get-Date): Exported $($inactive.Count) inactive accounts to $OutputPath\" | Out-File $logPath\n    Write-Host \"Done. $($inactive.Count) accounts exported.\"\n} catch {\n    \"$(Get-Date): ERROR - $_\" | Out-File $logPath -Append\n    throw\n}",
+          "language": "powershell"
+        }
+      }
+    },
+
+    "6_job_application_question": {
+      "description": "Answer a single application question",
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/v1/job/question",
+        "body": {
+          "question": "Describe a time you improved an IT process. What was the outcome?",
+          "background": "IT Technical Analyst at TIC. Built Python automation that reduced incident response time by 92%. Manages AD for 300+ users. ISO 27001 Lead Auditor certified.",
+          "role_title": "IT Support Specialist",
+          "company_name": "Gravitics",
+          "max_words": 120
+        }
+      },
+      "response": {
+        "status": "success",
+        "task_type": "job_application",
+        "data": {
+          "question": "Describe a time you improved an IT process. What was the outcome?",
+          "answer": "At Transportation Investment Corporation, I identified that our incident response process relied heavily on manual ticket triage. I built a Python automation suite that analyzed incoming tickets, categorized them by severity, and routed them to the appropriate team member automatically. The result was a 92% reduction in average incident response time — from hours to minutes for Tier 1 issues. The system now handles the initial triage for all 300+ users in our environment, freeing the team for higher-priority work.",
+          "role_title": "IT Support Specialist",
+          "company_name": "Gravitics"
+        }
+      }
+    },
+
+    "7_assistant_explain": {
+      "description": "Explain a concept at a configurable level",
+      "request": {
+        "method": "POST",
+        "url": "http://localhost:8000/api/v1/assistant/explain",
+        "body": {
+          "topic": "Zero Trust Architecture",
+          "level": "intermediate"
+        }
+      },
+      "response": {
+        "status": "success",
+        "task_type": "assistant",
+        "data": {
+          "explanation": "## Zero Trust Architecture\n\n**Summary:** Zero Trust is a security model based on 'never trust, always verify' — no user or device is inherently trusted, even inside the network perimeter...\n\n**How it works:**\n1. Identity verification on every request...\n2. Least-privilege access...\n\n**Real-world example:** Instead of trusting any device on the corporate VPN, a Zero Trust system would require MFA + device health check before granting access to SharePoint, even for an employee in the office...",
+          "topic": "Zero Trust Architecture",
+          "level": "intermediate"
+        }
+      }
+    },
+
+    "8_file_upload_curl": {
+      "description": "Upload a PDF resume via curl",
+      "curl_command": "curl -X POST http://localhost:8000/api/v1/resume/optimize/upload \\\n  -F 'resume_file=@/path/to/resume.pdf' \\\n  -F 'job_description=We are hiring a Senior IT Specialist with Azure AD and M365 experience...'"
+    },
+
+    "9_health_check": {
+      "description": "Check system and Ollama status",
+      "request": { "method": "GET", "url": "http://localhost:8000/health" },
+      "response": {
+        "status": "healthy",
+        "ollama": "connected",
+        "model": "mistral",
+        "registered_tasks": ["assistant", "code", "job_application", "resume"],
+        "version": "1.0.0"
+      }
+    }
+  }
+}
