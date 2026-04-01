@@ -83,10 +83,13 @@ class AssistantHandler:
             prompt = f"{history_block}\n\n{prompt}"
 
         start = time.time()
-        response = llm_service.complete(
-            prompt=prompt,
-            system_prompt=ASSISTANT_SYSTEM_PROMPT,
-        )
+        try:
+            response = llm_service.complete(
+                prompt=prompt,
+                system_prompt=ASSISTANT_SYSTEM_PROMPT,
+            )
+        except Exception as e:
+            return formatter.error("assistant", f"LLM request failed: {str(e)}")
         duration = time.time() - start
 
         db.save_task(
@@ -128,10 +131,13 @@ class AssistantHandler:
             return formatter.error("assistant", f"Prompt error: {str(e)}")
 
         start = time.time()
-        response = llm_service.complete(
-            prompt=prompt,
-            system_prompt=ASSISTANT_SYSTEM_PROMPT,
-        )
+        try:
+            response = llm_service.complete(
+                prompt=prompt,
+                system_prompt=ASSISTANT_SYSTEM_PROMPT,
+            )
+        except Exception as e:
+            return formatter.error("assistant", f"LLM request failed: {str(e)}")
         duration = time.time() - start
 
         return formatter.success(
