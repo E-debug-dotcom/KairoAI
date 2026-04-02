@@ -24,7 +24,7 @@ class APIClient:
             "message": message,
             "session_id": session_id,
             "category": category,
-            "top_k": 3,
+            "top_k": 4,
         }
         return self._post_json("/api/v1/assistant/chat", payload)
 
@@ -52,10 +52,6 @@ class APIClient:
             "top_k": top_k,
         }
         return self._post_json("/api/v1/learn/search", payload)
-
-    def list_sources(self, category: Optional[str] = None, limit: int = 200) -> dict[str, Any]:
-        payload = {"category": category, "limit": limit}
-        return self._post_json("/api/v1/learn/sources", payload)
 
     def _post_json(self, path: str, payload: dict[str, Any]) -> dict[str, Any]:
         url = f"{self.base_url}{path}"

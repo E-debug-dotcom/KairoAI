@@ -7,7 +7,6 @@ Supports ingesting user notes/documents and searching stored knowledge.
 from __future__ import annotations
 
 import time
-import uuid
 
 from core.output_formatter import formatter
 from parsers.document_parser import document_parser
@@ -28,7 +27,6 @@ class LearningHandler:
             "teach_text": self._teach_text,
             "teach_document": self._teach_document,
             "search": self._search,
-            "list_sources": self._list_sources,
         }
         if sub_task not in dispatch:
             return formatter.error("learning", f"Unknown sub_task '{sub_task}'.")
@@ -45,27 +43,7 @@ class LearningHandler:
 
         start = time.time()
         chunks = self._chunk_text(text)
-        doc_hash = vector_store.document_hash(text)
-        if vector_store.has_document(doc_hash=doc_hash, source=source):
-            return formatter.success(
-                "learning",
-                {
-                    "stored_chunks": 0,
-                    "source": source,
-                    "category": category,
-                    "preview": truncate_text(text, 200),
-                    "skipped_existing": True,
-                },
-                meta={"duration_seconds": 0.0},
-            )
-
-        ids = vector_store.add_chunks(
-            chunks,
-            source=source,
-            category=category,
-            tags=tags,
-            extra_metadata={"doc_hash": doc_hash, "doc_id": str(uuid.uuid4())},
-        )
+        ids = vector_store.add_chunks(chunks, source=source, category=category, tags=tags)
         duration = time.time() - start
 
         db.save_task(
@@ -101,32 +79,13 @@ class LearningHandler:
             return formatter.error("learning", f"Document parse failed: {str(e)}")
 
         chunks = self._chunk_text(text)
-        doc_hash = vector_store.document_hash(text)
-        if vector_store.has_document(doc_hash=doc_hash, source=filename):
-            return formatter.success(
-                "learning",
-                {
-                    "stored_chunks": 0,
-                    "source": filename,
-                    "category": category,
-                    "skipped_existing": True,
-                },
-            )
-
-        ids = vector_store.add_chunks(
-            chunks,
-            source=filename,
-            category=category,
-            tags=tags,
-            extra_metadata={"doc_hash": doc_hash, "doc_id": str(uuid.uuid4())},
-        )
+        ids = vector_store.add_chunks(chunks, source=filename, category=category, tags=tags)
         return formatter.success(
             "learning",
             {
                 "stored_chunks": len(ids),
                 "source": filename,
                 "category": category,
-                "document_hash": doc_hash,
             },
         )
 
@@ -141,14 +100,8 @@ class LearningHandler:
         items = vector_store.query(query_text=query, top_k=top_k, category=category)
         return formatter.success("learning", {"matches": items, "query": query})
 
-    async def _list_sources(self, payload: dict) -> dict:
-        category = payload.get("category")
-        limit = int(payload.get("limit", 200))
-        items = vector_store.list_sources(category=category, limit=limit)
-        return formatter.success("learning", {"sources": items, "count": len(items)})
-
     @staticmethod
-    def _chunk_text(text: str, chunk_size: int = 900, overlap: int = 90) -> list[str]:
+    def _chunk_text(text: str, chunk_size: int = 1200, overlap: int = 120) -> list[str]:
         """Simple sliding-window chunking for long ingested documents."""
         text = text.strip()
         if len(text) <= chunk_size:

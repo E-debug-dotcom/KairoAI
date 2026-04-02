@@ -26,7 +26,7 @@ See `ARCHITECTURE.md` for the full diagram.
 | Job Application | `/api/v1/job` | question, screening |
 | Code Generation | `/api/v1/code` | generate, review, explain |
 | Generic Dispatcher | `/api/v1/task` | any of the above via task_type |
-| Learning / Memory | `/api/v1/learn` | teach_text, teach_document, search, list_sources |
+| Learning / Memory | `/api/v1/learn` | teach_text, teach_document, search |
 
 ---
 
@@ -177,7 +177,7 @@ curl -X POST http://localhost:8000/api/v1/assistant/chat \
     "message": "What is our IAM onboarding process?",
     "session_id": "demo-user-1",
     "category": "iam",
-    "top_k": 3
+    "top_k": 4
   }'
 ```
 
@@ -188,14 +188,6 @@ curl -X POST http://localhost:8000/api/v1/learn/upload \
   -F "file=@security_runbook.pdf" \
   -F "category=security" \
   -F "tags=iam,least-privilege,incident-response"
-```
-
-### List learned document sources
-
-```bash
-curl -X POST http://localhost:8000/api/v1/learn/sources \
-  -H "Content-Type: application/json" \
-  -d '{"category":"security","limit":100}'
 ```
 
 ### Generate a PowerShell script

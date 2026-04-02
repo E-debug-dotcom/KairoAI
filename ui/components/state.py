@@ -19,8 +19,6 @@ def init_state() -> None:
         st.session_state.messages = list(DEFAULT_MESSAGES)
     if "memory_search_results" not in st.session_state:
         st.session_state.memory_search_results = []
-    if "learned_sources" not in st.session_state:
-        st.session_state.learned_sources = []
     if "session_id" not in st.session_state:
         st.session_state.session_id = "streamlit-session"
 
