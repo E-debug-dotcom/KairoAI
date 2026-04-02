@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     # ─── Ollama / LLM ──────────────────────────────────────────────────────────
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     DEFAULT_MODEL: str = "mistral"          # swap to "llama3" if preferred
-    OLLAMA_TIMEOUT: int = 120               # seconds per request
+    OLLAMA_TIMEOUT: int = 300               # seconds per request (larger prompts/docs can take longer)
     OLLAMA_MAX_RETRIES: int = 3
     LLM_TEMPERATURE: float = 0.3
     LLM_MAX_TOKENS: int = 4096

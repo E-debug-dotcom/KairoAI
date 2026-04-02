@@ -105,6 +105,21 @@ class LLMService:
                     raise LLMServiceError(f"Ollama returned HTTP error: {e.response.status_code}") from e
                 time.sleep(2 ** attempt)
 
+            except httpx.ReadTimeout as e:
+                logger.warning(
+                    "LLM request timed out on attempt %d/%d after %ss (model=%s)",
+                    attempt,
+                    self.max_retries,
+                    self.timeout,
+                    payload["model"],
+                )
+                if attempt == self.max_retries:
+                    raise LLMServiceError(
+                        f"LLM timed out after {self.timeout}s. "
+                        "Try a shorter prompt, smaller top_k, or increase OLLAMA_TIMEOUT."
+                    ) from e
+                time.sleep(2 ** attempt)
+
             except Exception as e:
                 logger.error("Unexpected LLM error on attempt %d: %s", attempt, str(e))
                 if attempt == self.max_retries:
