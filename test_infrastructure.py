@@ -198,3 +198,29 @@ def test_task_route_resume_coach_output_shape(monkeypatch):
     assert "formatted_resume" in result
     assert "analysis" in result
     assert "coaching" in result
+
+
+def test_resume_coach_endpoint_review(monkeypatch):
+    from fastapi.testclient import TestClient
+    from main import app
+    from core.llm_service import llm_service
+
+    async def fake_complete_async(*args, **kwargs):
+        return "- Add metrics to experience bullet\n- Include IAM tools in skills section"
+
+    monkeypatch.setattr(llm_service, "complete_async", fake_complete_async)
+
+    payload = {
+        "resume_text": "Experience: Led team; Skills: Python; Education: BS",
+        "job_description": "Need someone with Python and IAM experience",
+        "session_id": "session-123",
+    }
+
+    client = TestClient(app)
+    response = client.post("/api/v1/resume_coach/review", json=payload)
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "success"
+    result = body["data"]
+    assert result["resume_score"] == 0 or isinstance(result["resume_score"], int)
+

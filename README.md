@@ -219,24 +219,35 @@ curl -X POST http://localhost:8000/api/v1/task/ \
 
 ### Resume Coach (new)
 
+This module supports both generic task dispatcher and dedicated route.
+
+- Generic: `POST /api/v1/task` with `task_type: resume_coach`
+- Dedicated: `POST /api/v1/resume_coach/review`
+
 ```bash
-curl -X POST http://localhost:8000/api/v1/task/ \
+curl -X POST http://localhost:8000/api/v1/resume_coach/review \
   -H "Content-Type: application/json" \
   -d '{
-    "task_type": "resume_coach",
-    "payload": {
-      "resume_text": "Experienced IT Analyst with endpoint security experience...",
-      "job_description": "Looking for a Security Analyst familiar with IAM, incident response...",
-      "options": {
-        "optimize_for_ats": true,
-        "highlight_missing_skills": true,
-        "suggest_metrics": true
-      },
-      "force_llm": true,
-      "session_id": "session-xyz"
-    }
+    "resume_text": "Experienced IT Analyst with endpoint security experience...",
+    "job_description": "Looking for a Security Analyst familiar with IAM, incident response...",
+    "options": {
+      "optimize_for_ats": true,
+      "highlight_missing_skills": true,
+      "suggest_metrics": true
+    },
+    "session_id": "session-xyz",
+    "force_llm": true
   }'
 ```
+
+### Parser and output details
+- `resume_coach` extracts sections: Experience, Skills, Education, Certifications
+- Provides `formatted_resume` for structured export
+- Computes `resume_score` from analyzer similarity score
+- `improvements` are derived from LLM bullet items
+- Outputs include `ats_keywords`, `warnings`, plus raw `analysis` and `coaching` text
+
+---
 
 Expected output shape:
 

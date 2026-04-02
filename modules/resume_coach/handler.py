@@ -97,13 +97,15 @@ class ResumeCoachHandler:
                 }
             )
 
+        extracted_sections = self._extract_sections(resume_text)
         formatted_resume = {
             "raw_text": resume_text,
             "summary": resume_text[:500],
             "sections": {
-                "experience": resume_text.split("Experience")[-1][:500] if "Experience" in resume_text else "",
-                "skills": resume_text.split("Skills")[-1][:300] if "Skills" in resume_text else "",
-                "education": resume_text.split("Education")[-1][:300] if "Education" in resume_text else "",
+                "experience": extracted_sections.get("experience", ""),
+                "skills": extracted_sections.get("skills", ""),
+                "education": extracted_sections.get("education", ""),
+                "certifications": extracted_sections.get("certifications", ""),
             },
         }
 
@@ -217,6 +219,28 @@ class ResumeCoachHandler:
         raise ValueError(
             "No resume input found. Provide 'resume_text' or ('resume_file_content' and 'resume_filename')."
         )
+
+    def _extract_sections(self, resume_text: str) -> dict[str, str]:
+        normalized = resume_text.replace("\r\n", "\n")
+        section_names = ["Experience", "Skills", "Education", "Certifications"]
+        sections = {name.lower(): "" for name in section_names}
+
+        for name in section_names:
+            marker = f"{name}:" if f"{name}:" in normalized else name
+            if marker in normalized:
+                start = normalized.index(marker) + len(marker)
+                end = len(normalized)
+                for next_name in section_names:
+                    if next_name == name:
+                        continue
+                    next_marker = f"{next_name}:" if f"{next_name}:" in normalized else next_name
+                    if next_marker in normalized[start:]:
+                        end_candidate = normalized.index(next_marker, start)
+                        if end_candidate > start:
+                            end = min(end, end_candidate)
+                sections[name.lower()] = normalized[start:end].strip()
+
+        return sections
 
     def _require_field(self, payload: dict[str, Any], field: str) -> str:
         value = payload.get(field, "")

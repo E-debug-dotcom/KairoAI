@@ -16,6 +16,7 @@ from typing import Any, Literal, Optional
 from modules.assistant.handler import assistant_handler
 from modules.job_application.handler import job_application_handler
 from modules.code_gen.handler import code_gen_handler
+from modules.resume_coach.handler import resume_coach_handler
 from storage.database import db
 from utils.logger import get_logger
 
@@ -25,6 +26,7 @@ logger = get_logger(__name__)
 assistant_route = APIRouter(prefix="/assistant", tags=["Assistant"])
 job_app_route = APIRouter(prefix="/job", tags=["Job Application"])
 code_route = APIRouter(prefix="/code", tags=["Code Generation"])
+resume_coach_route = APIRouter(prefix="/resume_coach", tags=["Resume Coach"])
 history_route = APIRouter(prefix="/history", tags=["History"])
 
 
@@ -121,6 +123,43 @@ async def assistant_chat(request: AssistantChatRequest):
         "top_k": request.top_k,
     }
     result = await assistant_handler.handle(payload)
+    if result["status"] == "error":
+        raise HTTPException(status_code=422, detail=result["error"])
+    return result
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# RESUME COACH ROUTES
+# ═══════════════════════════════════════════════════════════════════════════════
+
+
+class ResumeCoachRequest(BaseModel):
+    resume_text: str = Field(..., description="Raw resume text")
+    job_description: str = Field(..., description="Job description text")
+    options: Optional[dict[str, Any]] = Field(
+        None,
+        description="Optional flags for optimization behavior (optimize_for_ats, highlight_missing_skills, suggest_metrics)",
+    )
+    session_id: Optional[str] = Field(None, description="Optional session ID for context tracking")
+    force_llm: Optional[bool] = Field(False, description="If true, bypass memory retrieval and use LLM")
+
+
+@resume_coach_route.post(
+    "/review",
+    summary="Coach the resume against job description",
+    description="Returns structured coaching guidance and ATS recommendations.",
+)
+async def resume_coach_review(request: ResumeCoachRequest):
+    payload = {
+        "sub_task": "review",
+        "resume_text": request.resume_text,
+        "job_description": request.job_description,
+        "options": request.options or {},
+        "session_id": request.session_id,
+        "force_llm": request.force_llm,
+    }
+
+    result = await resume_coach_handler.handle(payload)
     if result["status"] == "error":
         raise HTTPException(status_code=422, detail=result["error"])
     return result

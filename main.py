@@ -153,11 +153,19 @@ from api.routes.other_routes import (
     assistant_route,
     job_app_route,
     code_route,
+    resume_coach_route,
     history_route,
 )
 from api.routes.learning import learning_route
 
 app.include_router(task_route, prefix=settings.API_PREFIX)
+app.include_router(resume_route, prefix=settings.API_PREFIX)
+app.include_router(assistant_route, prefix=settings.API_PREFIX)
+app.include_router(job_app_route, prefix=settings.API_PREFIX)
+app.include_router(code_route, prefix=settings.API_PREFIX)
+app.include_router(resume_coach_route, prefix=settings.API_PREFIX)
+app.include_router(history_route, prefix=f"{settings.API_PREFIX}/history")
+app.include_router(learning_route, prefix=settings.API_PREFIX)
 app.include_router(resume_route, prefix=settings.API_PREFIX)
 app.include_router(assistant_route, prefix=settings.API_PREFIX)
 app.include_router(job_app_route, prefix=settings.API_PREFIX)
