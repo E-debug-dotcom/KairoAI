@@ -47,7 +47,11 @@ class Settings(BaseSettings):
     # ─── Parsing ───────────────────────────────────────────────────────────────
     MAX_FILE_SIZE_MB: int = 10
     ALLOWED_EXTENSIONS: list = ["pdf", "docx", "txt"]
-
+    # ─── Feature Flags ─────────────────────────────────────────────────────────
+    ENABLE_TOOL_USE: bool = True             # LLM-driven tool invocation
+    ENABLE_STREAMING: bool = True            # Token-by-token streaming
+    ENABLE_CACHING: bool = False             # Prompt caching (Claude-only)
+    ENFORCE_OUTPUT_SCHEMA: bool = True       # Validate output schemas
     class Config:
         env_file = ".env"
         env_file_encoding = "utf-8"

@@ -9,6 +9,7 @@ requires only one line in TASK_REGISTRY.
 import time
 from typing import Any, Callable, Optional
 
+from config import settings
 from utils.logger import get_logger
 from utils.helpers import span
 
@@ -36,6 +37,7 @@ class TaskRouter:
         "resume": "resume",
         "resume_coach": "resume_coach",
         "code": "code",
+        "code_gen": "code_gen",
         "learning": "learning",
     }
 
@@ -117,6 +119,36 @@ class TaskRouter:
                 normalized,
                 total_time_ms,
             )
+
+    async def route_tool_call(self, tool_name: str, tool_input: dict) -> dict:
+        """
+        Route a tool call (from LLM) to the appropriate handler.
+
+        Maps tool_name to task_type and invokes dispatch.
+
+        Args:
+            tool_name: Name of the tool to invoke (e.g., "resume_coach").
+            tool_input: Tool arguments dict.
+
+        Returns:
+            Structured result dict from the module handler.
+
+        Raises:
+            TaskNotFoundError: If tool is not registered.
+        """
+        normalized = self._normalize_task_type(tool_name)
+
+        if not settings.ENABLE_TOOL_USE:
+            raise RuntimeError("Tool use is disabled (ENABLE_TOOL_USE=False)")
+
+        logger.debug(
+            "span_route_tool_call | tool_name=%s tool_args_keys=%s",
+            tool_name,
+            list(tool_input.keys()),
+        )
+
+        # Invoke dispatch with tool_input as payload
+        return await self.dispatch(normalized, tool_input)
 
     def available_tasks(self) -> list[str]:
         """Return a sorted list of all registered task types."""

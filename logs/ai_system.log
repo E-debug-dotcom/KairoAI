@@ -227,3 +227,216 @@
 2026-04-02 19:29:59 | INFO     | 30f8b31d-f4cb-4c4c-800d-062459a4a994 | main | route_span | method=GET path=/health request_id=30f8b31d-f4cb-4c4c-800d-062459a4a994 latency_ms=29.99
 2026-04-02 19:29:59 | INFO     | 186d0b31-a17e-4d39-94c3-f55133335033 | main | route_span | method=GET path=/ request_id=186d0b31-a17e-4d39-94c3-f55133335033 latency_ms=1.47
 2026-04-02 19:29:59 | INFO     |  | test | Test log message
+2026-04-02 20:01:37 | WARNING  |  | core.tool_registry | Tool 'resume_coach' input missing required field: job_description
+2026-04-02 20:01:37 | WARNING  |  | core.tool_registry | Tool 'nonexistent_tool' not found in registry
+2026-04-02 20:01:37 | WARNING  |  | core.output_formatter | Schema repair for 'test_task': 1 errors fixed, 2 warnings
+2026-04-02 20:01:37 | INFO     |  | core.task_router | span_module_handler | task_type=resume_coach sub_task= handler_time_ms=0.00
+2026-04-02 20:01:37 | ERROR    |  | core.task_router | Unknown task_type='nonexistent_tool'. Available: []
+2026-04-02 20:01:44 | INFO     |  | core.task_router | span_module_handler | task_type=job_application sub_task= handler_time_ms=0.00
+2026-04-02 20:01:44 | INFO     |  | core.task_router | span_module_handler | task_type=resume_coach sub_task= handler_time_ms=0.00
+2026-04-02 20:01:44 | WARNING  |  | storage.vector_store | span_vector_store | operation=query top_k=5 n_results=0 latency_ms=0.02 invalid_collection_error=collection has insufficient records
+2026-04-02 20:01:44 | INFO     |  | storage.vector_store | span_vector_store_agg | operation=query n_results=0 latency_ms=0.02
+2026-04-02 20:01:44 | INFO     | test-request-id-123 | main | route_span | method=GET path=/health request_id=test-request-id-123 latency_ms=47.73
+2026-04-02 20:01:44 | INFO     |  | core.llm_service | span_llm_service_agg | model=mistral response_len=11 latency_ms=23.09
+2026-04-02 20:01:44 | INFO     |  | span | span_test_span | test_key=value duration_ms=10.09
+2026-04-02 20:01:44 | INFO     |  | span | span_test_span_agg | test_key=value duration_ms=10.09
+2026-04-02 20:01:44 | INFO     |  | core.decision_engine | span_decision_engine_agg | decision_type=memory_only memory_score=0.950 latency_ms=0.06
+2026-04-02 20:01:44 | INFO     | 5b6fd36a-0d02-4c04-98bb-329c6577adce | core.decision_engine | span_decision_engine_agg | decision_type=memory_only memory_score=0.900 latency_ms=0.03
+2026-04-02 20:01:44 | INFO     | 5b6fd36a-0d02-4c04-98bb-329c6577adce | main | route_span | method=POST path=/api/v1/task/ request_id=5b6fd36a-0d02-4c04-98bb-329c6577adce latency_ms=2.20
+2026-04-02 20:01:44 | INFO     |  | main | ============================================================
+2026-04-02 20:01:44 | INFO     |  | main | Starting LocalAI System v1.0.0
+2026-04-02 20:01:44 | INFO     |  | main | ============================================================
+2026-04-02 20:01:44 | INFO     |  | storage.database | Database initialized at: sqlite:///./ai_system.db
+2026-04-02 20:01:44 | INFO     |  | main | Prompt templates registered
+2026-04-02 20:01:44 | INFO     |  | main | Task router registered modules: ['assistant', 'code', 'job_application', 'learning', 'resume', 'resume_coach']
+2026-04-02 20:01:44 | INFO     |  | main | Tool registry loaded: ['assistant', 'code_gen', 'job_application', 'learning', 'resume_coach']
+2026-04-02 20:01:45 | INFO     |  | storage.vector_store | Vector store initialized at ./vector_db (collection=kairo_memory)
+2026-04-02 20:01:45 | WARNING  |  | main | Ollama is NOT reachable at http://localhost:11434. Start it with: ollama serve
+2026-04-02 20:01:45 | INFO     |  | main | System ready. API running at http://0.0.0.0:8000/api/v1
+2026-04-02 20:01:45 | INFO     | c7be12bc-13b4-41c4-b69e-c4a52c230d2e | core.decision_engine | span_decision_engine_agg | decision_type=llm_only memory_score=0.000 latency_ms=0.03
+2026-04-02 20:01:45 | INFO     | c7be12bc-13b4-41c4-b69e-c4a52c230d2e | modules.resume_coach.handler | ResumeCoach module handling sub_task='review'
+2026-04-02 20:01:45 | INFO     | c7be12bc-13b4-41c4-b69e-c4a52c230d2e | analysis.engine | Running full resume analysis
+2026-04-02 20:01:47 | INFO     | c7be12bc-13b4-41c4-b69e-c4a52c230d2e | analysis.engine | span_analysis_aggregate | tfidf_time_ms=2487.35 similarity_time_ms=36.34
+2026-04-02 20:01:47 | INFO     | c7be12bc-13b4-41c4-b69e-c4a52c230d2e | prompts.prompt_manager | span_prompt_render_agg | template_key=resume_coach::review render_time_ms=0.00
+2026-04-02 20:01:47 | INFO     | c7be12bc-13b4-41c4-b69e-c4a52c230d2e | storage.database | span_db_write_agg | table=task_records write_time_ms=11.20
+2026-04-02 20:01:47 | INFO     | c7be12bc-13b4-41c4-b69e-c4a52c230d2e | core.task_router | span_module_handler | task_type=resume_coach sub_task= handler_time_ms=2537.51
+2026-04-02 20:01:47 | INFO     | c7be12bc-13b4-41c4-b69e-c4a52c230d2e | main | route_span | method=POST path=/api/v1/task/ request_id=c7be12bc-13b4-41c4-b69e-c4a52c230d2e latency_ms=2538.72
+2026-04-02 20:01:47 | INFO     |  | main | Shutting down LocalAI System
+2026-04-02 20:01:47 | INFO     | a21beeed-26fc-49b8-861b-a7e96cc961eb | modules.resume_coach.handler | ResumeCoach module handling sub_task='review'
+2026-04-02 20:01:47 | INFO     | a21beeed-26fc-49b8-861b-a7e96cc961eb | analysis.engine | Running full resume analysis
+2026-04-02 20:01:47 | INFO     | a21beeed-26fc-49b8-861b-a7e96cc961eb | analysis.engine | span_analysis_aggregate | tfidf_time_ms=1.62 similarity_time_ms=2.05
+2026-04-02 20:01:47 | INFO     | a21beeed-26fc-49b8-861b-a7e96cc961eb | prompts.prompt_manager | span_prompt_render_agg | template_key=resume_coach::review render_time_ms=0.01
+2026-04-02 20:01:47 | INFO     | a21beeed-26fc-49b8-861b-a7e96cc961eb | storage.database | span_db_write_agg | table=task_records write_time_ms=6.30
+2026-04-02 20:01:47 | INFO     | a21beeed-26fc-49b8-861b-a7e96cc961eb | main | route_span | method=POST path=/api/v1/resume_coach/review request_id=a21beeed-26fc-49b8-861b-a7e96cc961eb latency_ms=13.95
+2026-04-02 20:01:47 | INFO     | 3d251915-c918-47ea-b941-acd17bbb15b6 | main | route_span | method=GET path=/health request_id=3d251915-c918-47ea-b941-acd17bbb15b6 latency_ms=25.35
+2026-04-02 20:01:47 | INFO     | 50b6d314-4f23-4c84-9b6c-4640fbdf500c | main | route_span | method=GET path=/ request_id=50b6d314-4f23-4c84-9b6c-4640fbdf500c latency_ms=1.38
+2026-04-02 20:01:47 | INFO     |  | test | Test log message
+2026-04-02 20:01:47 | WARNING  |  | core.tool_registry | Tool 'resume_coach' input missing required field: job_description
+2026-04-02 20:01:47 | WARNING  |  | core.tool_registry | Tool 'nonexistent_tool' not found in registry
+2026-04-02 20:01:47 | WARNING  |  | core.output_formatter | Schema repair for 'test_task': 1 errors fixed, 2 warnings
+2026-04-02 20:01:47 | INFO     |  | core.task_router | span_module_handler | task_type=resume_coach sub_task= handler_time_ms=0.00
+2026-04-02 20:01:47 | ERROR    |  | core.task_router | Unknown task_type='nonexistent_tool'. Available: []
+2026-04-02 20:04:24 | WARNING  |  | core.streaming_manager | Max streaming sessions reached; removing oldest: s1
+2026-04-02 20:04:24 | ERROR    |  | core.streaming_manager | Error during streaming: Test error
+2026-04-02 20:04:31 | INFO     |  | core.task_router | span_module_handler | task_type=job_application sub_task= handler_time_ms=0.00
+2026-04-02 20:04:31 | INFO     |  | core.task_router | span_module_handler | task_type=resume_coach sub_task= handler_time_ms=0.00
+2026-04-02 20:04:31 | WARNING  |  | storage.vector_store | span_vector_store | operation=query top_k=5 n_results=0 latency_ms=0.02 invalid_collection_error=collection has insufficient records
+2026-04-02 20:04:31 | INFO     |  | storage.vector_store | span_vector_store_agg | operation=query n_results=0 latency_ms=0.02
+2026-04-02 20:04:31 | INFO     | test-request-id-123 | main | route_span | method=GET path=/health request_id=test-request-id-123 latency_ms=24.18
+2026-04-02 20:04:31 | INFO     |  | core.llm_service | span_llm_service_agg | model=mistral response_len=11 latency_ms=31.20
+2026-04-02 20:04:31 | INFO     |  | span | span_test_span | test_key=value duration_ms=10.08
+2026-04-02 20:04:31 | INFO     |  | span | span_test_span_agg | test_key=value duration_ms=10.08
+2026-04-02 20:04:31 | INFO     |  | core.decision_engine | span_decision_engine_agg | decision_type=memory_only memory_score=0.950 latency_ms=0.05
+2026-04-02 20:04:31 | INFO     | ebb9f57f-31b7-4068-b311-d847f7e36e44 | core.decision_engine | span_decision_engine_agg | decision_type=memory_only memory_score=0.900 latency_ms=0.03
+2026-04-02 20:04:31 | INFO     | ebb9f57f-31b7-4068-b311-d847f7e36e44 | main | route_span | method=POST path=/api/v1/task/ request_id=ebb9f57f-31b7-4068-b311-d847f7e36e44 latency_ms=2.23
+2026-04-02 20:04:31 | INFO     |  | main | ============================================================
+2026-04-02 20:04:31 | INFO     |  | main | Starting LocalAI System v1.0.0
+2026-04-02 20:04:31 | INFO     |  | main | ============================================================
+2026-04-02 20:04:31 | INFO     |  | storage.database | Database initialized at: sqlite:///./ai_system.db
+2026-04-02 20:04:31 | INFO     |  | main | Prompt templates registered
+2026-04-02 20:04:31 | INFO     |  | main | Task router registered modules: ['assistant', 'code', 'job_application', 'learning', 'resume', 'resume_coach']
+2026-04-02 20:04:31 | INFO     |  | main | Tool registry loaded: ['assistant', 'code_gen', 'job_application', 'learning', 'resume_coach']
+2026-04-02 20:04:31 | INFO     |  | storage.vector_store | Vector store initialized at ./vector_db (collection=kairo_memory)
+2026-04-02 20:04:31 | WARNING  |  | main | Ollama is NOT reachable at http://localhost:11434. Start it with: ollama serve
+2026-04-02 20:04:31 | INFO     |  | main | System ready. API running at http://0.0.0.0:8000/api/v1
+2026-04-02 20:04:31 | INFO     | 1762eec4-a435-413f-9362-e688dadf332f | core.decision_engine | span_decision_engine_agg | decision_type=llm_only memory_score=0.000 latency_ms=0.03
+2026-04-02 20:04:31 | INFO     | 1762eec4-a435-413f-9362-e688dadf332f | modules.resume_coach.handler | ResumeCoach module handling sub_task='review'
+2026-04-02 20:04:31 | INFO     | 1762eec4-a435-413f-9362-e688dadf332f | analysis.engine | Running full resume analysis
+2026-04-02 20:04:33 | INFO     | 1762eec4-a435-413f-9362-e688dadf332f | analysis.engine | span_analysis_aggregate | tfidf_time_ms=1388.31 similarity_time_ms=23.97
+2026-04-02 20:04:33 | INFO     | 1762eec4-a435-413f-9362-e688dadf332f | prompts.prompt_manager | span_prompt_render_agg | template_key=resume_coach::review render_time_ms=0.01
+2026-04-02 20:04:33 | INFO     | 1762eec4-a435-413f-9362-e688dadf332f | storage.database | span_db_write_agg | table=task_records write_time_ms=12.07
+2026-04-02 20:04:33 | INFO     | 1762eec4-a435-413f-9362-e688dadf332f | core.task_router | span_module_handler | task_type=resume_coach sub_task= handler_time_ms=1427.65
+2026-04-02 20:04:33 | INFO     | 1762eec4-a435-413f-9362-e688dadf332f | main | route_span | method=POST path=/api/v1/task/ request_id=1762eec4-a435-413f-9362-e688dadf332f latency_ms=1429.03
+2026-04-02 20:04:33 | INFO     |  | main | Shutting down LocalAI System
+2026-04-02 20:04:33 | INFO     | 3994de0f-6198-4720-bf03-7f29c6c790f2 | modules.resume_coach.handler | ResumeCoach module handling sub_task='review'
+2026-04-02 20:04:33 | INFO     | 3994de0f-6198-4720-bf03-7f29c6c790f2 | analysis.engine | Running full resume analysis
+2026-04-02 20:04:33 | INFO     | 3994de0f-6198-4720-bf03-7f29c6c790f2 | analysis.engine | span_analysis_aggregate | tfidf_time_ms=1.53 similarity_time_ms=2.47
+2026-04-02 20:04:33 | INFO     | 3994de0f-6198-4720-bf03-7f29c6c790f2 | prompts.prompt_manager | span_prompt_render_agg | template_key=resume_coach::review render_time_ms=0.01
+2026-04-02 20:04:33 | INFO     | 3994de0f-6198-4720-bf03-7f29c6c790f2 | storage.database | span_db_write_agg | table=task_records write_time_ms=5.81
+2026-04-02 20:04:33 | INFO     | 3994de0f-6198-4720-bf03-7f29c6c790f2 | main | route_span | method=POST path=/api/v1/resume_coach/review request_id=3994de0f-6198-4720-bf03-7f29c6c790f2 latency_ms=13.97
+2026-04-02 20:04:33 | INFO     | 0d208529-0510-4c1b-8d01-f4edd1fc0d59 | main | route_span | method=GET path=/health request_id=0d208529-0510-4c1b-8d01-f4edd1fc0d59 latency_ms=26.30
+2026-04-02 20:04:33 | INFO     | dd1f4614-6c4e-46ec-9422-8ca9a96124a6 | main | route_span | method=GET path=/ request_id=dd1f4614-6c4e-46ec-9422-8ca9a96124a6 latency_ms=1.41
+2026-04-02 20:04:33 | INFO     |  | test | Test log message
+2026-04-02 20:04:33 | WARNING  |  | core.streaming_manager | Max streaming sessions reached; removing oldest: s1
+2026-04-02 20:04:33 | ERROR    |  | core.streaming_manager | Error during streaming: Test error
+2026-04-02 20:04:33 | WARNING  |  | core.tool_registry | Tool 'resume_coach' input missing required field: job_description
+2026-04-02 20:04:33 | WARNING  |  | core.tool_registry | Tool 'nonexistent_tool' not found in registry
+2026-04-02 20:04:33 | WARNING  |  | core.output_formatter | Schema repair for 'test_task': 1 errors fixed, 2 warnings
+2026-04-02 20:04:33 | INFO     |  | core.task_router | span_module_handler | task_type=resume_coach sub_task= handler_time_ms=0.00
+2026-04-02 20:04:33 | ERROR    |  | core.task_router | Unknown task_type='nonexistent_tool'. Available: []
+2026-04-02 20:08:08 | ERROR    |  | core.llm_service | Ollama not reachable at http://localhost:11434 — is it running?
+2026-04-02 20:08:09 | ERROR    |  | core.llm_service | Ollama not reachable at http://localhost:11434 — is it running?
+2026-04-02 20:08:10 | WARNING  |  | modules.code_gen.handler | Multi-file context retrieval failed: 'coroutine' object is not iterable
+2026-04-02 20:08:10 | WARNING  |  | modules.code_gen.handler | Multi-file context retrieval failed: 'coroutine' object is not iterable
+2026-04-02 20:08:10 | WARNING  |  | modules.code_gen.handler | Multi-file context retrieval failed: 'coroutine' object is not iterable
+2026-04-02 20:09:17 | WARNING  |  | modules.code_gen.handler | Multi-file context retrieval failed: Vector store error
+2026-04-02 20:09:22 | WARNING  |  | core.tool_registry | Tool 'resume_coach' input missing required field: job_description
+2026-04-02 20:09:22 | WARNING  |  | core.tool_registry | Tool 'nonexistent_tool' not found in registry
+2026-04-02 20:09:22 | WARNING  |  | core.output_formatter | Schema repair for 'test_task': 1 errors fixed, 2 warnings
+2026-04-02 20:09:22 | INFO     |  | core.task_router | span_module_handler | task_type=resume_coach sub_task= handler_time_ms=0.00
+2026-04-02 20:09:22 | ERROR    |  | core.task_router | Unknown task_type='nonexistent_tool'. Available: []
+2026-04-02 20:09:23 | WARNING  |  | core.streaming_manager | Max streaming sessions reached; removing oldest: s1
+2026-04-02 20:09:23 | ERROR    |  | core.streaming_manager | Error during streaming: Test error
+2026-04-02 20:09:23 | WARNING  |  | modules.code_gen.handler | Multi-file context retrieval failed: Vector store error
+2026-04-02 20:09:28 | WARNING  |  | core.tool_registry | Tool 'resume_coach' input missing required field: job_description
+2026-04-02 20:09:28 | WARNING  |  | core.tool_registry | Tool 'nonexistent_tool' not found in registry
+2026-04-02 20:09:28 | WARNING  |  | core.output_formatter | Schema repair for 'test_task': 1 errors fixed, 2 warnings
+2026-04-02 20:09:28 | INFO     |  | core.task_router | span_module_handler | task_type=resume_coach sub_task= handler_time_ms=0.00
+2026-04-02 20:09:28 | ERROR    |  | core.task_router | Unknown task_type='nonexistent_tool'. Available: []
+2026-04-02 20:09:28 | WARNING  |  | core.streaming_manager | Max streaming sessions reached; removing oldest: s1
+2026-04-02 20:09:28 | ERROR    |  | core.streaming_manager | Error during streaming: Test error
+2026-04-02 20:09:29 | WARNING  |  | modules.code_gen.handler | Multi-file context retrieval failed: Vector store error
+2026-04-02 20:12:05 | INFO     |  | core.task_router | span_module_handler | task_type=job_application sub_task= handler_time_ms=0.00
+2026-04-02 20:12:05 | INFO     |  | core.task_router | span_module_handler | task_type=resume_coach sub_task= handler_time_ms=0.00
+2026-04-02 20:12:05 | WARNING  |  | storage.vector_store | span_vector_store | operation=query top_k=5 n_results=0 latency_ms=0.02 invalid_collection_error=collection has insufficient records
+2026-04-02 20:12:05 | INFO     |  | storage.vector_store | span_vector_store_agg | operation=query n_results=0 latency_ms=0.02
+2026-04-02 20:12:05 | INFO     | test-request-id-123 | main | route_span | method=GET path=/health request_id=test-request-id-123 latency_ms=28.39
+2026-04-02 20:12:05 | INFO     |  | core.llm_service | span_llm_service_agg | model=mistral response_len=11 latency_ms=21.42
+2026-04-02 20:12:05 | INFO     |  | span | span_test_span | test_key=value duration_ms=10.08
+2026-04-02 20:12:05 | INFO     |  | span | span_test_span_agg | test_key=value duration_ms=10.08
+2026-04-02 20:12:05 | INFO     |  | core.decision_engine | span_decision_engine_agg | decision_type=memory_only memory_score=0.950 latency_ms=0.06
+2026-04-02 20:12:05 | INFO     | 82244fcc-a297-4fa4-adb4-45172b3f0faa | core.decision_engine | span_decision_engine_agg | decision_type=memory_only memory_score=0.900 latency_ms=0.05
+2026-04-02 20:12:05 | INFO     | 82244fcc-a297-4fa4-adb4-45172b3f0faa | main | route_span | method=POST path=/api/v1/task/ request_id=82244fcc-a297-4fa4-adb4-45172b3f0faa latency_ms=4.35
+2026-04-02 20:12:05 | INFO     |  | main | ============================================================
+2026-04-02 20:12:05 | INFO     |  | main | Starting LocalAI System v1.0.0
+2026-04-02 20:12:05 | INFO     |  | main | ============================================================
+2026-04-02 20:12:05 | INFO     |  | storage.database | Database initialized at: sqlite:///./ai_system.db
+2026-04-02 20:12:05 | INFO     |  | main | Prompt templates registered
+2026-04-02 20:12:05 | INFO     |  | main | Task router registered modules: ['assistant', 'code', 'job_application', 'learning', 'resume', 'resume_coach']
+2026-04-02 20:12:05 | INFO     |  | main | Tool registry loaded: ['assistant', 'code_gen', 'job_application', 'learning', 'resume_coach']
+2026-04-02 20:12:06 | INFO     |  | storage.vector_store | Vector store initialized at ./vector_db (collection=kairo_memory)
+2026-04-02 20:12:06 | WARNING  |  | main | Ollama is NOT reachable at http://localhost:11434. Start it with: ollama serve
+2026-04-02 20:12:06 | INFO     |  | main | System ready. API running at http://0.0.0.0:8000/api/v1
+2026-04-02 20:12:06 | INFO     | 8627fb95-de3f-4309-864a-8031d22b0f85 | core.decision_engine | span_decision_engine_agg | decision_type=llm_only memory_score=0.000 latency_ms=0.03
+2026-04-02 20:12:06 | INFO     | 8627fb95-de3f-4309-864a-8031d22b0f85 | modules.resume_coach.handler | ResumeCoach module handling sub_task='review'
+2026-04-02 20:12:06 | INFO     | 8627fb95-de3f-4309-864a-8031d22b0f85 | analysis.engine | Running full resume analysis
+2026-04-02 20:12:08 | INFO     | 8627fb95-de3f-4309-864a-8031d22b0f85 | analysis.engine | span_analysis_aggregate | tfidf_time_ms=1901.48 similarity_time_ms=40.19
+2026-04-02 20:12:08 | INFO     | 8627fb95-de3f-4309-864a-8031d22b0f85 | prompts.prompt_manager | span_prompt_render_agg | template_key=resume_coach::review render_time_ms=0.01
+2026-04-02 20:12:08 | INFO     | 8627fb95-de3f-4309-864a-8031d22b0f85 | storage.database | span_db_write_agg | table=task_records write_time_ms=11.03
+2026-04-02 20:12:08 | INFO     | 8627fb95-de3f-4309-864a-8031d22b0f85 | core.task_router | span_module_handler | task_type=resume_coach sub_task= handler_time_ms=1955.30
+2026-04-02 20:12:08 | INFO     | 8627fb95-de3f-4309-864a-8031d22b0f85 | main | route_span | method=POST path=/api/v1/task/ request_id=8627fb95-de3f-4309-864a-8031d22b0f85 latency_ms=1956.97
+2026-04-02 20:12:08 | INFO     |  | main | Shutting down LocalAI System
+2026-04-02 20:12:08 | INFO     | 624e9903-06bd-42e1-8774-464e6858cba7 | modules.resume_coach.handler | ResumeCoach module handling sub_task='review'
+2026-04-02 20:12:08 | INFO     | 624e9903-06bd-42e1-8774-464e6858cba7 | analysis.engine | Running full resume analysis
+2026-04-02 20:12:08 | INFO     | 624e9903-06bd-42e1-8774-464e6858cba7 | analysis.engine | span_analysis_aggregate | tfidf_time_ms=5.64 similarity_time_ms=4.46
+2026-04-02 20:12:08 | INFO     | 624e9903-06bd-42e1-8774-464e6858cba7 | prompts.prompt_manager | span_prompt_render_agg | template_key=resume_coach::review render_time_ms=0.01
+2026-04-02 20:12:08 | INFO     | 624e9903-06bd-42e1-8774-464e6858cba7 | storage.database | span_db_write_agg | table=task_records write_time_ms=19.68
+2026-04-02 20:12:08 | INFO     | 624e9903-06bd-42e1-8774-464e6858cba7 | main | route_span | method=POST path=/api/v1/resume_coach/review request_id=624e9903-06bd-42e1-8774-464e6858cba7 latency_ms=35.86
+2026-04-02 20:12:08 | INFO     | 8d6ca413-d9be-4a68-be45-093d6b4b574d | main | route_span | method=GET path=/health request_id=8d6ca413-d9be-4a68-be45-093d6b4b574d latency_ms=24.40
+2026-04-02 20:12:08 | INFO     | bacb8835-2197-431c-8cd5-3b52a4840f56 | main | route_span | method=GET path=/ request_id=bacb8835-2197-431c-8cd5-3b52a4840f56 latency_ms=1.29
+2026-04-02 20:12:08 | INFO     |  | test | Test log message
+2026-04-02 20:12:08 | WARNING  |  | core.tool_registry | Tool 'resume_coach' input missing required field: job_description
+2026-04-02 20:12:08 | WARNING  |  | core.tool_registry | Tool 'nonexistent_tool' not found in registry
+2026-04-02 20:12:08 | WARNING  |  | core.output_formatter | Schema repair for 'test_task': 1 errors fixed, 2 warnings
+2026-04-02 20:12:08 | INFO     |  | core.task_router | span_module_handler | task_type=resume_coach sub_task= handler_time_ms=0.00
+2026-04-02 20:12:08 | ERROR    |  | core.task_router | Unknown task_type='nonexistent_tool'. Available: []
+2026-04-02 20:12:08 | WARNING  |  | core.streaming_manager | Max streaming sessions reached; removing oldest: s1
+2026-04-02 20:12:08 | ERROR    |  | core.streaming_manager | Error during streaming: Test error
+2026-04-02 20:12:08 | WARNING  |  | modules.code_gen.handler | Multi-file context retrieval failed: Vector store error
+2026-04-02 20:12:18 | INFO     |  | core.task_router | span_module_handler | task_type=job_application sub_task= handler_time_ms=0.00
+2026-04-02 20:12:18 | INFO     |  | core.task_router | span_module_handler | task_type=resume_coach sub_task= handler_time_ms=0.00
+2026-04-02 20:12:18 | WARNING  |  | storage.vector_store | span_vector_store | operation=query top_k=5 n_results=0 latency_ms=0.02 invalid_collection_error=collection has insufficient records
+2026-04-02 20:12:18 | INFO     |  | storage.vector_store | span_vector_store_agg | operation=query n_results=0 latency_ms=0.02
+2026-04-02 20:12:18 | INFO     | test-request-id-123 | main | route_span | method=GET path=/health request_id=test-request-id-123 latency_ms=25.67
+2026-04-02 20:12:18 | INFO     |  | core.llm_service | span_llm_service_agg | model=mistral response_len=11 latency_ms=31.42
+2026-04-02 20:12:18 | INFO     |  | span | span_test_span | test_key=value duration_ms=10.08
+2026-04-02 20:12:18 | INFO     |  | span | span_test_span_agg | test_key=value duration_ms=10.08
+2026-04-02 20:12:18 | INFO     |  | core.decision_engine | span_decision_engine_agg | decision_type=memory_only memory_score=0.950 latency_ms=0.05
+2026-04-02 20:12:18 | INFO     | dbae33ff-65c2-473f-bf61-45f3f79ec750 | core.decision_engine | span_decision_engine_agg | decision_type=memory_only memory_score=0.900 latency_ms=0.03
+2026-04-02 20:12:18 | INFO     | dbae33ff-65c2-473f-bf61-45f3f79ec750 | main | route_span | method=POST path=/api/v1/task/ request_id=dbae33ff-65c2-473f-bf61-45f3f79ec750 latency_ms=3.03
+2026-04-02 20:12:18 | INFO     |  | main | ============================================================
+2026-04-02 20:12:18 | INFO     |  | main | Starting LocalAI System v1.0.0
+2026-04-02 20:12:18 | INFO     |  | main | ============================================================
+2026-04-02 20:12:18 | INFO     |  | storage.database | Database initialized at: sqlite:///./ai_system.db
+2026-04-02 20:12:18 | INFO     |  | main | Prompt templates registered
+2026-04-02 20:12:18 | INFO     |  | main | Task router registered modules: ['assistant', 'code', 'job_application', 'learning', 'resume', 'resume_coach']
+2026-04-02 20:12:18 | INFO     |  | main | Tool registry loaded: ['assistant', 'code_gen', 'job_application', 'learning', 'resume_coach']
+2026-04-02 20:12:19 | INFO     |  | storage.vector_store | Vector store initialized at ./vector_db (collection=kairo_memory)
+2026-04-02 20:12:19 | WARNING  |  | main | Ollama is NOT reachable at http://localhost:11434. Start it with: ollama serve
+2026-04-02 20:12:19 | INFO     |  | main | System ready. API running at http://0.0.0.0:8000/api/v1
+2026-04-02 20:12:19 | INFO     | 1b3da53a-e7ff-423c-9d19-7f03189e8e70 | core.decision_engine | span_decision_engine_agg | decision_type=llm_only memory_score=0.000 latency_ms=0.04
+2026-04-02 20:12:19 | INFO     | 1b3da53a-e7ff-423c-9d19-7f03189e8e70 | modules.resume_coach.handler | ResumeCoach module handling sub_task='review'
+2026-04-02 20:12:19 | INFO     | 1b3da53a-e7ff-423c-9d19-7f03189e8e70 | analysis.engine | Running full resume analysis
+2026-04-02 20:12:20 | INFO     | 1b3da53a-e7ff-423c-9d19-7f03189e8e70 | analysis.engine | span_analysis_aggregate | tfidf_time_ms=1813.35 similarity_time_ms=21.33
+2026-04-02 20:12:20 | INFO     | 1b3da53a-e7ff-423c-9d19-7f03189e8e70 | prompts.prompt_manager | span_prompt_render_agg | template_key=resume_coach::review render_time_ms=0.00
+2026-04-02 20:12:21 | INFO     | 1b3da53a-e7ff-423c-9d19-7f03189e8e70 | storage.database | span_db_write_agg | table=task_records write_time_ms=10.88
+2026-04-02 20:12:21 | INFO     | 1b3da53a-e7ff-423c-9d19-7f03189e8e70 | core.task_router | span_module_handler | task_type=resume_coach sub_task= handler_time_ms=1848.28
+2026-04-02 20:12:21 | INFO     | 1b3da53a-e7ff-423c-9d19-7f03189e8e70 | main | route_span | method=POST path=/api/v1/task/ request_id=1b3da53a-e7ff-423c-9d19-7f03189e8e70 latency_ms=1849.67
+2026-04-02 20:12:21 | INFO     |  | main | Shutting down LocalAI System
+2026-04-02 20:12:21 | INFO     | 165e6be6-56ab-48d6-bbf4-7fddeba314b5 | modules.resume_coach.handler | ResumeCoach module handling sub_task='review'
+2026-04-02 20:12:21 | INFO     | 165e6be6-56ab-48d6-bbf4-7fddeba314b5 | analysis.engine | Running full resume analysis
+2026-04-02 20:12:21 | INFO     | 165e6be6-56ab-48d6-bbf4-7fddeba314b5 | analysis.engine | span_analysis_aggregate | tfidf_time_ms=1.79 similarity_time_ms=2.17
+2026-04-02 20:12:21 | INFO     | 165e6be6-56ab-48d6-bbf4-7fddeba314b5 | prompts.prompt_manager | span_prompt_render_agg | template_key=resume_coach::review render_time_ms=0.01
+2026-04-02 20:12:21 | INFO     | 165e6be6-56ab-48d6-bbf4-7fddeba314b5 | storage.database | span_db_write_agg | table=task_records write_time_ms=5.99
+2026-04-02 20:12:21 | INFO     | 165e6be6-56ab-48d6-bbf4-7fddeba314b5 | main | route_span | method=POST path=/api/v1/resume_coach/review request_id=165e6be6-56ab-48d6-bbf4-7fddeba314b5 latency_ms=14.17
+2026-04-02 20:12:21 | INFO     | 40c69232-27b8-45b4-9532-0c5bea392886 | main | route_span | method=GET path=/health request_id=40c69232-27b8-45b4-9532-0c5bea392886 latency_ms=30.65
+2026-04-02 20:12:21 | INFO     | a9c889b4-f106-4011-acdc-595854251ed6 | main | route_span | method=GET path=/ request_id=a9c889b4-f106-4011-acdc-595854251ed6 latency_ms=2.30
+2026-04-02 20:12:21 | INFO     |  | test | Test log message
+2026-04-02 20:12:21 | WARNING  |  | core.tool_registry | Tool 'resume_coach' input missing required field: job_description
+2026-04-02 20:12:21 | WARNING  |  | core.tool_registry | Tool 'nonexistent_tool' not found in registry
+2026-04-02 20:12:21 | WARNING  |  | core.output_formatter | Schema repair for 'test_task': 1 errors fixed, 2 warnings
+2026-04-02 20:12:21 | INFO     |  | core.task_router | span_module_handler | task_type=resume_coach sub_task= handler_time_ms=0.00
+2026-04-02 20:12:21 | ERROR    |  | core.task_router | Unknown task_type='nonexistent_tool'. Available: []
+2026-04-02 20:12:21 | WARNING  |  | core.streaming_manager | Max streaming sessions reached; removing oldest: s1
+2026-04-02 20:12:21 | ERROR    |  | core.streaming_manager | Error during streaming: Test error
+2026-04-02 20:12:21 | WARNING  |  | modules.code_gen.handler | Multi-file context retrieval failed: Vector store error

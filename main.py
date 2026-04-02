@@ -72,6 +72,14 @@ async def lifespan(app: FastAPI):
     router.register("learning", learning_handler.handle)
     logger.info("Task router registered modules: %s", router.available_tasks())
 
+    # 3b. Initialize tool registry (for LLM tool calling)
+    if settings.ENABLE_TOOL_USE:
+        from core.tool_registry import ToolRegistry
+        tools = ToolRegistry.list_tools()
+        logger.info("Tool registry loaded: %s", tools)
+    else:
+        logger.debug("Tool use disabled (ENABLE_TOOL_USE=False)")
+
     # 4. Initialize vector memory store
     from storage.vector_store import vector_store
     vector_store.init()
@@ -154,6 +162,7 @@ from api.routes.other_routes import (
     job_app_route,
     code_route,
     resume_coach_route,
+    streaming_route,
     history_route,
 )
 from api.routes.learning import learning_route
@@ -164,12 +173,7 @@ app.include_router(assistant_route, prefix=settings.API_PREFIX)
 app.include_router(job_app_route, prefix=settings.API_PREFIX)
 app.include_router(code_route, prefix=settings.API_PREFIX)
 app.include_router(resume_coach_route, prefix=settings.API_PREFIX)
-app.include_router(history_route, prefix=f"{settings.API_PREFIX}/history")
-app.include_router(learning_route, prefix=settings.API_PREFIX)
-app.include_router(resume_route, prefix=settings.API_PREFIX)
-app.include_router(assistant_route, prefix=settings.API_PREFIX)
-app.include_router(job_app_route, prefix=settings.API_PREFIX)
-app.include_router(code_route, prefix=settings.API_PREFIX)
+app.include_router(streaming_route, prefix=settings.API_PREFIX)
 app.include_router(history_route, prefix=f"{settings.API_PREFIX}/history")
 app.include_router(learning_route, prefix=settings.API_PREFIX)
 

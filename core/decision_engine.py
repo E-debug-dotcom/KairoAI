@@ -3,9 +3,12 @@ core/decision_engine.py — Decide whether to use memory/tool/LLM pipeline for a
 """
 
 import time
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import Any, Dict, Optional
 
+from config import settings
+from core.output_formatter import SchemaValidator
+from core.tool_registry import OUTPUT_SCHEMAS
 from storage.vector_store import vector_store
 from utils.logger import get_logger
 
@@ -20,6 +23,10 @@ class DecisionOutcome:
     use_memory: bool
     use_llm: bool
     use_tools: bool
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dict for schema validation."""
+        return asdict(self)
 
 
 class DecisionEngine:
@@ -47,7 +54,7 @@ class DecisionEngine:
                 use_llm=True,
                 use_tools=False,
             )
-            self._log(outcome, start)
+            self._validate_and_log(outcome, start)
             return outcome
 
         if payload.get("force_tools"):
@@ -59,7 +66,7 @@ class DecisionEngine:
                 use_llm=True,
                 use_tools=True,
             )
-            self._log(outcome, start)
+            self._validate_and_log(outcome, start)
             return outcome
 
         # 2) Memory similarity scoring
@@ -84,7 +91,7 @@ class DecisionEngine:
                 use_llm=False,
                 use_tools=False,
             )
-            self._log(outcome, start)
+            self._validate_and_log(outcome, start)
             return outcome
 
         if not query_text.strip() or len(query_text) < self.SHORT_QUERY_THRESHOLD:
@@ -96,7 +103,7 @@ class DecisionEngine:
                 use_llm=True,
                 use_tools=False,
             )
-            self._log(outcome, start)
+            self._validate_and_log(outcome, start)
             return outcome
 
         # default to full pipeline
@@ -108,10 +115,25 @@ class DecisionEngine:
             use_llm=True,
             use_tools=False,
         )
-        self._log(outcome, start)
+        self._validate_and_log(outcome, start)
         return outcome
 
-    def _log(self, outcome: DecisionOutcome, start_time: float) -> None:
+    def _validate_and_log(self, outcome: DecisionOutcome, start_time: float) -> None:
+        """Validate outcome against schema and log."""
+        # Validate against decision schema
+        schema = OUTPUT_SCHEMAS.get("decision", {})
+        outcome_dict = outcome.to_dict()
+
+        if settings.ENFORCE_OUTPUT_SCHEMA:
+            is_valid, errors = SchemaValidator.validate(outcome_dict, schema)
+            if not is_valid:
+                logger.warning(
+                    "Decision outcome schema validation failed: %s",
+                    errors,
+                )
+        else:
+            logger.debug("Schema validation disabled (ENFORCE_OUTPUT_SCHEMA=False)")
+
         latency_ms = round((time.time() - start_time) * 1000, 2)
         logger.debug(
             "span_decision_engine | decision_type=%s memory_score=%.3f reason=%s latency_ms=%.2f",

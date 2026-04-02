@@ -11,6 +11,7 @@ import time
 
 from core.llm_service import llm_service
 from core.output_formatter import formatter
+from storage.vector_store import vector_store
 from prompts.prompt_manager import prompt_manager
 from prompts.assistant_prompts import CODE_SYSTEM_PROMPT
 from utils.logger import get_logger
@@ -23,6 +24,29 @@ SUPPORTED_LANGUAGES = {"python", "powershell", "bash", "javascript", "typescript
 
 class CodeGenHandler:
     """Generates, reviews, and explains code in multiple languages."""
+
+    async def _get_related_files_context(self, query: str, top_k: int = 3) -> str:
+        """
+        Query vector store for related files/code snippets.
+
+        This provides multi-file context for consistent code generation.
+        """
+        try:
+            results = vector_store.query(query_text=query, top_k=top_k, category="code")
+            if not results:
+                return ""
+
+            context_lines = ["Related code files/context:"]
+            for i, result in enumerate(results, 1):
+                text = result.get("text", "")
+                distance = result.get("distance", 0)
+                similarity = 1.0 - min(max(distance, 0), 1.0)
+                context_lines.append(f"  [{i}] (similarity: {similarity:.2f}):")
+                context_lines.append(f"      {truncate_text(text, 500)}")
+            return "\n".join(context_lines)
+        except Exception as e:
+            logger.warning("Multi-file context retrieval failed: %s", str(e))
+            return ""
 
     async def handle(self, payload: dict) -> dict:
         sub_task = payload.get("sub_task", "generate")
@@ -58,6 +82,10 @@ class CodeGenHandler:
         example = payload.get("example_input_output", "").strip()
         example_block = f"EXAMPLE INPUT/OUTPUT:\n{example}" if example else ""
 
+        # Multi-file context: retrieve related code for consistency
+        related_context = await self._get_related_files_context(task_description)
+        related_context_block = f"\n{related_context}" if related_context else ""
+
         try:
             prompt = prompt_manager.render(
                 "code", "generate",
@@ -65,6 +93,7 @@ class CodeGenHandler:
                 task_description=task_description,
                 requirements_block=requirements_block,
                 example_block=example_block,
+                related_context_block=related_context_block,
             )
         except Exception as e:
             return formatter.error("code", f"Prompt error: {str(e)}")
@@ -80,7 +109,7 @@ class CodeGenHandler:
         return formatter.success(
             "code",
             {"code": code, "language": language, "task_description": task_description},
-            meta={"duration_seconds": round(duration, 2)},
+            meta={"duration_seconds": round(duration, 2), "used_related_context": bool(related_context)},
         )
 
     async def _review(self, payload: dict) -> dict:

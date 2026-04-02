@@ -148,29 +148,66 @@ class LLMService:
         model: Optional[str] = None,
     ) -> AsyncGenerator[str, None]:
         """
-        Async streaming version using httpx.AsyncClient and aiorw.
+        Async streaming version with retry logic.
+        Yields tokens one at a time from Ollama.
         """
         payload = self._build_payload(prompt, system_prompt, model, stream=True)
+        start_time = time.time()
 
-        try:
-            timeout = httpx.Timeout(self.timeout, connect=self.timeout, read=self.timeout)
-            async with httpx.AsyncClient(timeout=timeout) as client:
-                async with client.stream("POST", f"{self.base_url}/api/generate", json=payload) as response:
-                    response.raise_for_status()
-                    async for line in response.aiter_lines():
-                        if not line:
-                            continue
-                        try:
-                            chunk = json.loads(line)
-                            if token := chunk.get("response", ""):
-                                yield token
-                            if chunk.get("done", False):
-                                break
-                        except json.JSONDecodeError:
-                            continue
+        for attempt in range(1, self.max_retries + 1):
+            try:
+                logger.debug(
+                    "LLM stream attempt %d/%d | model=%s | prompt_len=%d",
+                    attempt,
+                    self.max_retries,
+                    payload["model"],
+                    len(prompt),
+                )
 
-        except httpx.ConnectError as e:
-            raise LLMServiceError(f"Cannot connect to Ollama: {str(e)}") from e
+                timeout = httpx.Timeout(self.timeout, connect=self.timeout, read=self.timeout)
+                async with httpx.AsyncClient(timeout=timeout) as client:
+                    async with client.stream("POST", f"{self.base_url}/api/generate", json=payload) as response:
+                        response.raise_for_status()
+                        token_count = 0
+                        async for line in response.aiter_lines():
+                            if not line:
+                                continue
+                            try:
+                                chunk = json.loads(line)
+                                if token := chunk.get("response", ""):
+                                    token_count += 1
+                                    yield token
+                                if chunk.get("done", False):
+                                    elapsed = time.time() - start_time
+                                    logger.debug(
+                                        "span_llm_stream | model=%s attempt=%d tokens=%d latency_ms=%.2f",
+                                        payload["model"],
+                                        attempt,
+                                        token_count,
+                                        elapsed * 1000,
+                                    )
+                                    return
+                            except json.JSONDecodeError:
+                                continue
+                        return
+
+            except httpx.ConnectError as e:
+                logger.error("Ollama not reachable at %s during streaming", self.base_url)
+                if attempt == self.max_retries:
+                    raise LLMServiceError(f"Cannot connect to Ollama: {str(e)}") from e
+                await asyncio.sleep(2 ** attempt)
+
+            except (httpx.ReadTimeout, httpx.TimeoutException) as e:
+                logger.warning("Stream timeout on attempt %d/%d after %ss", attempt, self.max_retries, self.timeout)
+                if attempt == self.max_retries:
+                    raise LLMServiceError(f"Streaming timed out after {self.timeout}s") from e
+                await asyncio.sleep(2 ** attempt)
+
+            except Exception as e:
+                logger.error("Unexpected error during streaming attempt %d: %s", attempt, str(e))
+                if attempt == self.max_retries:
+                    raise LLMServiceError(f"Streaming failed after {self.max_retries} attempts: {str(e)}") from e
+                await asyncio.sleep(1)
 
     def stream(
         self,
@@ -264,6 +301,180 @@ class LLMService:
             except json.JSONDecodeError:
                 continue
         return "".join(full_text).strip()
+
+    # ─── Tool calling support ─────────────────────────────────────────────────
+
+    async def complete_with_tools_async(
+        self,
+        prompt: str,
+        system_prompt: Optional[str] = None,
+        model: Optional[str] = None,
+        temperature: Optional[float] = None,
+    ) -> dict:
+        """
+        Call LLM with tool definitions available (for systems that support it).
+
+        For Ollama (local), tool calling is limited. This method documents
+        the interface and can be extended for OpenAI/Claude APIs.
+
+        Returns:
+            {
+                "content": "response text",
+                "tool_calls": [
+                    {"name": "...", "arguments": {...}},
+                    ...
+                ],
+                "stop_reason": "end_turn" | "tool_calls"
+            }
+        """
+        from config import settings
+
+        if not settings.ENABLE_TOOL_USE:
+            # Fall back to regular completion
+            content = await self.complete_async(prompt, system_prompt, model, temperature)
+            return {"content": content, "tool_calls": [], "stop_reason": "end_turn"}
+
+        # For Ollama, we cannot actually invoke tools through the API.
+        # This method demonstrates the contract. In production, use FastAPI endpoint
+        # that dispatches tool calls to task_router.
+        logger.debug("Tool calling requested but not supported by Ollama backend")
+
+        content = await self.complete_async(prompt, system_prompt, model, temperature)
+        # Attempt to extract tool calls from response text (heuristic)
+        tool_calls = self._extract_tool_calls_from_text(content)
+
+        return {
+            "content": content,
+            "tool_calls": tool_calls,
+            "stop_reason": "tool_calls" if tool_calls else "end_turn",
+        }
+
+    def _extract_tool_calls_from_text(self, text: str) -> list[dict]:
+        """
+        Heuristically extract tool call attempts from LLM response text.
+
+        Looks for patterns like: <tool_call name="..." args={...}>
+        """
+        import re
+
+        tool_calls = []
+        # Pattern: <tool_call name="tool_name" args={json}>...</tool_call>
+        pattern = r'<tool_call\s+name="([^"]+)"\s+args=({[^}]+})\s*>'
+        matches = re.finditer(pattern, text)
+
+        for match in matches:
+            tool_name = match.group(1)
+            args_str = match.group(2)
+            try:
+                args = json.loads(args_str)
+                tool_calls.append({"name": tool_name, "arguments": args})
+            except json.JSONDecodeError:
+                logger.warning("Failed to parse tool call arguments: %s", args_str)
+
+        return tool_calls
+
+    def complete_with_tools(
+        self,
+        prompt: str,
+        system_prompt: Optional[str] = None,
+        model: Optional[str] = None,
+        temperature: Optional[float] = None,
+    ) -> dict:
+        """Sync wrapper for complete_with_tools_async."""
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            return asyncio.run(
+                self.complete_with_tools_async(prompt, system_prompt, model, temperature)
+            )
+        else:
+            raise RuntimeError(
+                "LLMService.complete_with_tools should not be called in async context; "
+                "use complete_with_tools_async instead."
+            )
+
+    # ─── Prompt caching support (Claude-only) ─────────────────────────────────
+
+    async def complete_with_cache_async(
+        self,
+        prompt: str,
+        cached_context: Optional[dict] = None,
+        system_prompt: Optional[str] = None,
+        model: Optional[str] = None,
+        temperature: Optional[float] = None,
+    ) -> dict:
+        """
+        Call LLM with prompt caching headers (Claude-only).
+
+        For Ollama, this degrades gracefully to regular completion.
+        For Claude, caches the `cached_context` to reduce token usage.
+
+        Args:
+            prompt: The user message
+            cached_context: Dict of cacheable content (e.g., session metadata, task definitions)
+            system_prompt: System message
+            model: Optional model override
+            temperature: Optional temperature override
+
+        Returns:
+            {
+                "content": "response text",
+                "cache_hit": bool,
+                "cache_tokens_saved": int,
+            }
+        """
+        if not settings.ENABLE_CACHING:
+            content = await self.complete_async(prompt, system_prompt, model, temperature)
+            return {"content": content, "cache_hit": False, "cache_tokens_saved": 0}
+
+        # For Ollama, caching is not available; fall back to regular completion
+        if "claude" not in (model or self.model).lower():
+            logger.debug("Prompt caching not available for model %s; using standard completion", model or self.model)
+            content = await self.complete_async(prompt, system_prompt, model, temperature)
+            return {"content": content, "cache_hit": False, "cache_tokens_saved": 0}
+
+        # For Claude: add cache_control headers to make context cacheable
+        # This is a documented interface; actual caching is handled by Claude API
+        logger.debug(
+            "Prompt caching enabled for Claude model with %d bytes of cacheable context",
+            len(json.dumps(cached_context or {})),
+        )
+
+        # Prepend cacheable context to the prompt for Claude's cache_control processing
+        full_prompt = prompt
+        if cached_context:
+            context_str = json.dumps(cached_context, indent=2)
+            full_prompt = f"[CACHED_CONTEXT]\n{context_str}\n\n[USER_QUERY]\n{prompt}"
+
+        # For now, fall back to regular completion (actual caching handled by Claude API wrapper if deployed)
+        content = await self.complete_async(full_prompt, system_prompt, model or "claude-3.5-sonnet", temperature)
+
+        return {
+            "content": content,
+            "cache_hit": False,  # Without direct Claude API access, we can't track cache stats
+            "cache_tokens_saved": 0,
+        }
+
+    def complete_with_cache(
+        self,
+        prompt: str,
+        cached_context: Optional[dict] = None,
+        system_prompt: Optional[str] = None,
+        model: Optional[str] = None,
+        temperature: Optional[float] = None,
+    ) -> dict:
+        """Sync wrapper for complete_with_cache_async."""
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            return asyncio.run(
+                self.complete_with_cache_async(prompt, cached_context, system_prompt, model, temperature)
+            )
+        else:
+            raise RuntimeError(
+                "LLMService.complete_with_cache should not be called in async context; "
+                "use complete_with_cache_async instead."
+            )
 
 
 class LLMServiceError(Exception):
