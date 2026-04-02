@@ -58,14 +58,20 @@ async def lifespan(app: FastAPI):
     from modules.assistant.handler import assistant_handler
     from modules.job_application.handler import job_application_handler
     from modules.code_gen.handler import code_gen_handler
+    from modules.learning.handler import learning_handler
 
     router.register("resume", resume_handler.handle)
     router.register("assistant", assistant_handler.handle)
     router.register("job_application", job_application_handler.handle)
     router.register("code", code_gen_handler.handle)
+    router.register("learning", learning_handler.handle)
     logger.info("Task router registered modules: %s", router.available_tasks())
 
-    # 4. Check Ollama availability
+    # 4. Initialize vector memory store
+    from storage.vector_store import vector_store
+    vector_store.init()
+
+    # 5. Check Ollama availability
     from core.llm_service import llm_service
     if llm_service.is_available():
         models = llm_service.list_models()
@@ -118,6 +124,7 @@ from api.routes.other_routes import (
     code_route,
     history_route,
 )
+from api.routes.learning import learning_route
 
 app.include_router(task_route, prefix=settings.API_PREFIX)
 app.include_router(resume_route, prefix=settings.API_PREFIX)
@@ -125,6 +132,7 @@ app.include_router(assistant_route, prefix=settings.API_PREFIX)
 app.include_router(job_app_route, prefix=settings.API_PREFIX)
 app.include_router(code_route, prefix=settings.API_PREFIX)
 app.include_router(history_route, prefix=f"{settings.API_PREFIX}/history")
+app.include_router(learning_route, prefix=settings.API_PREFIX)
 
 
 # ─── Health & Root ────────────────────────────────────────────────────────────
