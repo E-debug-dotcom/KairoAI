@@ -42,6 +42,25 @@ def test_vector_store_query_on_empty_collection(monkeypatch):
     assert results == []
 
 
+def test_vector_store_query_chromadb_invalid_argument(monkeypatch):
+    store = VectorStore()
+    store._initialized = True
+
+    class DummyCollection:
+        def count(self):
+            return 4
+
+        def query(self, *args, **kwargs):
+            class InvalidArgumentError(Exception):
+                pass
+
+            raise InvalidArgumentError("collection has insufficient records")
+
+    store._collection = DummyCollection()
+    results = store.query(query_text="test", top_k=5)
+    assert results == []
+
+
 def test_request_id_middleware_passes_header():
     client = TestClient(app)
 

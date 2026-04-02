@@ -13,6 +13,11 @@ from typing import Optional
 from config import settings
 from utils.logger import get_logger
 
+try:
+    from chromadb.errors import InvalidArgumentError
+except Exception:
+    InvalidArgumentError = None
+
 logger = get_logger(__name__)
 
 
@@ -156,11 +161,28 @@ class VectorStore:
             logger.debug("span_vector_store | operation=query top_k=%d n_results=0 latency_ms=%.2f", top_k, latency_ms)
             return []
 
-        results = self._collection.query(
-            query_texts=[query_text],
-            n_results=max(1, top_k),
-            where=where,
-        )
+        try:
+            results = self._collection.query(
+                query_texts=[query_text],
+                n_results=max(1, top_k),
+                where=where,
+            )
+        except Exception as e:
+            # ChromaDB may raise InvalidArgumentError when query is requested against an empty collection.
+            if (InvalidArgumentError and isinstance(e, InvalidArgumentError)) or e.__class__.__name__ == "InvalidArgumentError":
+                latency_ms = round((time.time() - op_start) * 1000, 2)
+                logger.warning(
+                    "span_vector_store | operation=query top_k=%d n_results=0 latency_ms=%.2f invalid_collection_error=%s",
+                    top_k,
+                    latency_ms,
+                    str(e),
+                )
+                logger.info(
+                    "span_vector_store_agg | operation=query n_results=0 latency_ms=%.2f",
+                    latency_ms,
+                )
+                return []
+            raise
 
         docs = results.get("documents", [[]])[0]
         metas = results.get("metadatas", [[]])[0]
