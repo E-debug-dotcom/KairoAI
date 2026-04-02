@@ -30,7 +30,7 @@ class ResumeCoachHandler:
     """
 
     async def handle(self, payload: dict[str, Any]) -> dict:
-        sub_task = payload.get("sub_task", "review")
+        sub_task = payload.get("sub_task", "review") or "review"
         logger.info("ResumeCoach module handling sub_task='%s'", sub_task)
 
         dispatch = {
@@ -79,7 +79,43 @@ class ResumeCoachHandler:
 
         duration = time.time() - start
 
+        resume_score = int(round(analysis["similarity_score"] * 100))
+        ats_keywords = analysis.get("matched_keywords", [])[:20]
+
+        # Convert LLM coaching block into structured suggestions if possible
+        improvements = []
+        for line in coaching.splitlines():
+            normalized = line.strip()
+            if normalized.startswith("- "):
+                improvements.append({"section": "General", "suggestion": normalized[2:].strip()})
+
+        if not improvements:
+            improvements.append(
+                {
+                    "section": "General",
+                    "suggestion": "Review assistant coaching text for recommended improvements.",
+                }
+            )
+
+        formatted_resume = {
+            "raw_text": resume_text,
+            "summary": resume_text[:500],
+            "sections": {
+                "experience": resume_text.split("Experience")[-1][:500] if "Experience" in resume_text else "",
+                "skills": resume_text.split("Skills")[-1][:300] if "Skills" in resume_text else "",
+                "education": resume_text.split("Education")[-1][:300] if "Education" in resume_text else "",
+            },
+        }
+
+        request_id = payload.get("request_id") or payload.get("session_id") or ""
+
         result = {
+            "request_id": request_id,
+            "resume_score": resume_score,
+            "improvements": improvements,
+            "ats_keywords": ats_keywords,
+            "warnings": [],
+            "formatted_resume": formatted_resume,
             "analysis": {
                 "similarity_score": analysis["similarity_score"],
                 "keyword_match_score": analysis["keyword_match_score"],
@@ -88,8 +124,6 @@ class ResumeCoachHandler:
                 "total_jd_keywords": analysis["total_jd_keywords"],
             },
             "coaching": coaching,
-            "ats_keywords": analysis.get("matched_keywords", [])[:20],
-            "warnings": [],
         }
 
         if analysis["similarity_score"] < 0.3:

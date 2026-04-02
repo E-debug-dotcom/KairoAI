@@ -217,6 +217,53 @@ curl -X POST http://localhost:8000/api/v1/task/ \
   }'
 ```
 
+### Resume Coach (new)
+
+```bash
+curl -X POST http://localhost:8000/api/v1/task/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task_type": "resume_coach",
+    "payload": {
+      "resume_text": "Experienced IT Analyst with endpoint security experience...",
+      "job_description": "Looking for a Security Analyst familiar with IAM, incident response...",
+      "options": {
+        "optimize_for_ats": true,
+        "highlight_missing_skills": true,
+        "suggest_metrics": true
+      },
+      "force_llm": true,
+      "session_id": "session-xyz"
+    }
+  }'
+```
+
+Expected output shape:
+
+```json
+{
+  "status": "success",
+  "task_type": "resume_coach",
+  "data": {
+    "request_id": "session-xyz",
+    "resume_score": 83,
+    "improvements": [
+      {"section": "General", "suggestion": "Include quant metrics"},
+      {"section": "General", "suggestion": "Add IAM skill line"}
+    ],
+    "ats_keywords": ["IAM", "endpoint security"],
+    "warnings": [],
+    "formatted_resume": {
+      "raw_text": "...",
+      "summary": "...",
+      "sections": {"experience": "...", "skills": "...", "education": "..."}
+    },
+    "analysis": {...},
+    "coaching": "..."
+  }
+}
+```
+
 ---
 
 ## Project Structure

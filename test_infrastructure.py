@@ -157,3 +157,44 @@ def test_task_route_decision_memory_only(monkeypatch):
     body = response.json()
     assert body["source"] == "memory"
     assert "items" in body
+
+
+def test_task_route_resume_coach_output_shape(monkeypatch):
+    from fastapi.testclient import TestClient
+    from main import app
+    from core.llm_service import llm_service
+
+    async def fake_complete_async(*args, **kwargs):
+        return "- Include quant metrics\n- Add IAM skill line"
+
+    monkeypatch.setattr(llm_service, "complete_async", fake_complete_async)
+
+    payload = {
+        "task_type": "resume_coach",
+        "payload": {
+            "resume_text": "Experienced IT Analyst with endpoint security experience...",
+            "job_description": "Looking for a Security Analyst familiar with IAM, incident response...",
+            "options": {
+                "optimize_for_ats": True,
+                "highlight_missing_skills": True,
+                "suggest_metrics": True,
+            },
+            "force_llm": True,
+            "session_id": "session-xyz",
+        },
+    }
+
+    with TestClient(app) as client:
+        response = client.post("/api/v1/task/", json=payload)
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "success"
+    result = body["data"]
+    assert result["request_id"] == "session-xyz"
+    assert "resume_score" in result
+    assert "improvements" in result
+    assert "ats_keywords" in result
+    assert "warnings" in result
+    assert "formatted_resume" in result
+    assert "analysis" in result
+    assert "coaching" in result

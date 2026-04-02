@@ -78,8 +78,8 @@ async def lifespan(app: FastAPI):
 
     # 5. Check Ollama availability
     from core.llm_service import llm_service
-    if llm_service.is_available():
-        models = llm_service.list_models()
+    if await llm_service.is_available_async():
+        models = await llm_service.list_models_async()
         logger.info("Ollama is available. Models: %s", models)
     else:
         logger.warning(
