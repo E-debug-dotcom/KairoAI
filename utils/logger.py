@@ -5,10 +5,28 @@ Uses Python's standard logging with rotating file handler.
 
 import logging
 import os
+import contextvars
 from logging.handlers import RotatingFileHandler
 from typing import Optional
 
 from config import settings
+
+# Context variable for per-request tracing
+request_id_ctx: contextvars.ContextVar[str] = contextvars.ContextVar("request_id", default="")
+
+
+class RequestIdFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        setattr(record, "request_id", request_id_ctx.get(""))
+        return True
+
+
+def set_request_id(request_id: str) -> None:
+    request_id_ctx.set(request_id)
+
+
+def clear_request_id() -> None:
+    request_id_ctx.set("")
 
 
 def get_logger(name: str, level: Optional[str] = None) -> logging.Logger:
@@ -26,14 +44,18 @@ def get_logger(name: str, level: Optional[str] = None) -> logging.Logger:
         return logger
 
     formatter = logging.Formatter(
-        fmt="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
+        fmt="%(asctime)s | %(levelname)-8s | %(request_id)s | %(name)s | %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
+
+    # Attach request id filter to all handlers
+    request_filter = RequestIdFilter()
 
     # ─── Console handler ───────────────────────────────────────────────────────
     console_handler = logging.StreamHandler()
     console_handler.setLevel(log_level)
     console_handler.setFormatter(formatter)
+    console_handler.addFilter(request_filter)
     logger.addHandler(console_handler)
 
     # ─── Rotating file handler ─────────────────────────────────────────────────
@@ -49,6 +71,7 @@ def get_logger(name: str, level: Optional[str] = None) -> logging.Logger:
     )
     file_handler.setLevel(log_level)
     file_handler.setFormatter(formatter)
+    file_handler.addFilter(request_filter)
     logger.addHandler(file_handler)
 
     return logger

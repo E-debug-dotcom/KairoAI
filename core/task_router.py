@@ -6,9 +6,11 @@ and routes the request to the correct handler. Adding a new module
 requires only one line in TASK_REGISTRY.
 """
 
+import time
 from typing import Any, Callable, Optional
 
 from utils.logger import get_logger
+from utils.helpers import span
 
 logger = get_logger(__name__)
 
@@ -26,6 +28,16 @@ class TaskRouter:
         result = await router.dispatch("resume", payload)
     """
 
+    TASK_ALIASES = {
+        "job": "job_application",
+        "job_app": "job_application",
+        "job_application": "job_application",
+        "assistant": "assistant",
+        "resume": "resume",
+        "code": "code",
+        "learning": "learning",
+    }
+
     def __init__(self):
         self._registry: dict[str, Callable] = {}
 
@@ -42,6 +54,10 @@ class TaskRouter:
         self._registry[task_type] = handler
         logger.debug("Registered handler for task_type='%s'", task_type)
 
+    def _normalize_task_type(self, task_type: str) -> str:
+        requested = task_type.strip().lower()
+        return self.TASK_ALIASES.get(requested, requested)
+
     async def dispatch(self, task_type: str, payload: dict) -> dict:
         """
         Route a request to the appropriate module handler.
@@ -56,9 +72,14 @@ class TaskRouter:
         Raises:
             TaskNotFoundError: If task_type has no registered handler.
         """
-        normalized = task_type.strip().lower()
+        dispatch_start = time.time()
+        normalized = self._normalize_task_type(task_type)
 
-        if normalized not in self._registry:
+        lookup_start = time.time()
+        handler = self._registry.get(normalized)
+        lookup_time_ms = round((time.time() - lookup_start) * 1000, 2)
+
+        if handler is None:
             available = sorted(self._registry.keys())
             logger.error("Unknown task_type='%s'. Available: %s", task_type, available)
             raise TaskNotFoundError(
@@ -66,16 +87,35 @@ class TaskRouter:
                 f"Available tasks: {available}"
             )
 
-        handler = self._registry[normalized]
-        logger.info("Dispatching task_type='%s'", normalized)
+        logger.debug(
+            "span_task_router_dispatch | task_type=%s normalized_key=%s lookup_time_ms=%.2f",
+            task_type,
+            normalized,
+            lookup_time_ms,
+        )
 
+        handler_start = time.time()
         try:
             result = await handler(payload)
-            logger.info("Task '%s' completed successfully", normalized)
+            handler_time_ms = round((time.time() - handler_start) * 1000, 2)
+            sub_task = payload.get("sub_task", "")
+            logger.info(
+                "span_module_handler | task_type=%s sub_task=%s handler_time_ms=%.2f",
+                normalized,
+                sub_task,
+                handler_time_ms,
+            )
             return result
         except Exception as e:
             logger.error("Task '%s' failed: %s", normalized, str(e), exc_info=True)
             raise
+        finally:
+            total_time_ms = round((time.time() - dispatch_start) * 1000, 2)
+            logger.debug(
+                "span_task_router_total | task_type=%s total_time_ms=%.2f",
+                normalized,
+                total_time_ms,
+            )
 
     def available_tasks(self) -> list[str]:
         """Return a sorted list of all registered task types."""

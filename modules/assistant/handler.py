@@ -84,7 +84,7 @@ class AssistantHandler:
 
         start = time.time()
         try:
-            response = llm_service.complete(
+            response = await llm_service.complete_async(
                 prompt=prompt,
                 system_prompt=ASSISTANT_SYSTEM_PROMPT,
             )
@@ -132,7 +132,7 @@ class AssistantHandler:
 
         start = time.time()
         try:
-            response = llm_service.complete(
+            response = await llm_service.complete_async(
                 prompt=prompt,
                 system_prompt=ASSISTANT_SYSTEM_PROMPT,
             )
@@ -170,7 +170,7 @@ class AssistantHandler:
         )
 
         start = time.time()
-        answer = llm_service.complete(prompt=prompt, system_prompt=ASSISTANT_SYSTEM_PROMPT)
+        answer = await llm_service.complete_async(prompt=prompt, system_prompt=ASSISTANT_SYSTEM_PROMPT)
         duration = time.time() - start
 
         db.save_task(

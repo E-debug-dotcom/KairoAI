@@ -69,7 +69,7 @@ class JobApplicationHandler:
             return formatter.error("job_application", f"Prompt error: {str(e)}")
 
         start = time.time()
-        answer = llm_service.complete(
+        answer = await llm_service.complete_async(
             prompt=prompt,
             system_prompt=JOB_APP_SYSTEM_PROMPT,
             temperature=0.4,
@@ -117,7 +117,7 @@ class JobApplicationHandler:
             return formatter.error("job_application", f"Prompt error: {str(e)}")
 
         start = time.time()
-        answers = llm_service.complete(
+        answers = await llm_service.complete_async(
             prompt=prompt,
             system_prompt=JOB_APP_SYSTEM_PROMPT,
             temperature=0.4,

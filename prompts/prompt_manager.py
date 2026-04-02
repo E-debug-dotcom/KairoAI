@@ -5,6 +5,7 @@ Templates are stored per-module and rendered with variable substitution.
 This keeps prompts out of module logic and makes them easy to tune.
 """
 
+import time
 from typing import Any
 from utils.logger import get_logger
 
@@ -53,8 +54,20 @@ class PromptManager:
 
         template = self._templates[key]
         try:
+            start = time.time()
             rendered = template.format(**kwargs)
-            logger.debug("Rendered prompt '%s' (%d chars)", key, len(rendered))
+            render_time_ms = round((time.time() - start) * 1000, 2)
+            logger.debug(
+                "span_prompt_render | template_key=%s render_time_ms=%.2f prompt_len=%d",
+                key,
+                render_time_ms,
+                len(rendered),
+            )
+            logger.info(
+                "span_prompt_render_agg | template_key=%s render_time_ms=%.2f",
+                key,
+                render_time_ms,
+            )
             return rendered
         except KeyError as e:
             raise KeyError(

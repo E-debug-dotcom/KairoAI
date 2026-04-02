@@ -6,6 +6,7 @@ Provides simple ingest and semantic retrieval methods used by assistant and lear
 
 from __future__ import annotations
 
+import time
 import uuid
 from typing import Optional
 
@@ -55,6 +56,7 @@ class VectorStore:
         tags: Optional[list[str]] = None,
     ) -> str:
         """Add a text chunk to memory and return its generated record id."""
+        op_start = time.time()
         self.init()
 
         cleaned = (text or "").strip()
@@ -73,6 +75,16 @@ class VectorStore:
                 }
             ],
         )
+
+        latency_ms = round((time.time() - op_start) * 1000, 2)
+        logger.debug(
+            "span_vector_store | operation=add_text n_results=1 latency_ms=%.2f",
+            latency_ms,
+        )
+        logger.info(
+            "span_vector_store_agg | operation=add_text latency_ms=%.2f",
+            latency_ms,
+        )
         return record_id
 
     def add_chunks(
@@ -83,9 +95,15 @@ class VectorStore:
         tags: Optional[list[str]] = None,
     ) -> list[str]:
         """Bulk insert multiple text chunks with shared metadata."""
+        op_start = time.time()
         self.init()
         valid_chunks = [c.strip() for c in chunks if c and c.strip()]
         if not valid_chunks:
+            logger.debug(
+                "span_vector_store | operation=add_chunks n_results=%d latency_ms=%.2f",
+                0,
+                (time.time() - op_start) * 1000,
+            )
             return []
 
         ids = [str(uuid.uuid4()) for _ in valid_chunks]
@@ -101,6 +119,17 @@ class VectorStore:
                 for _ in valid_chunks
             ],
         )
+
+        latency_ms = round((time.time() - op_start) * 1000, 2)
+        logger.debug(
+            "span_vector_store | operation=add_chunks n_results=%d latency_ms=%.2f",
+            len(ids),
+            latency_ms,
+        )
+        logger.info(
+            "span_vector_store_agg | operation=add_chunks latency_ms=%.2f",
+            latency_ms,
+        )
         return ids
 
     def query(
@@ -115,6 +144,18 @@ class VectorStore:
             return []
 
         where = {"category": category} if category else None
+
+        try:
+            collection_count = self._collection.count()
+        except Exception:
+            collection_count = 0
+
+        op_start = time.time()
+        if collection_count == 0:
+            latency_ms = round((time.time() - op_start) * 1000, 2)
+            logger.debug("span_vector_store | operation=query top_k=%d n_results=0 latency_ms=%.2f", top_k, latency_ms)
+            return []
+
         results = self._collection.query(
             query_texts=[query_text],
             n_results=max(1, top_k),
@@ -138,6 +179,19 @@ class VectorStore:
                     "distance": distance,
                 }
             )
+
+        latency_ms = round((time.time() - op_start) * 1000, 2)
+        logger.debug(
+            "span_vector_store | operation=query top_k=%d n_results=%d latency_ms=%.2f",
+            top_k,
+            len(response),
+            latency_ms,
+        )
+        logger.info(
+            "span_vector_store_agg | operation=query n_results=%d latency_ms=%.2f",
+            len(response),
+            latency_ms,
+        )
         return response
 
 

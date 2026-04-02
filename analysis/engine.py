@@ -6,6 +6,7 @@ Uses scikit-learn for NLP analysis. No external API calls.
 """
 
 import re
+import time
 from typing import Optional
 
 from utils.logger import get_logger
@@ -214,12 +215,31 @@ class ResumeAnalyzer:
         """
         logger.info("Running full resume analysis")
 
+        tfidf_start = time.time()
         jd_keywords = self.extractor.extract_from_jd(job_description)
+        tfidf_time_ms = round((time.time() - tfidf_start) * 1000, 2)
+
         missing_keywords = self.extractor.find_missing_keywords(jd_keywords, resume_text)
         matched_keywords = [kw for kw in jd_keywords if kw not in missing_keywords]
 
+        similarity_start = time.time()
         similarity = self.scorer.score(resume_text, job_description)
+        similarity_time_ms = round((time.time() - similarity_start) * 1000, 2)
+
         keyword_score = self.scorer.score_keywords(jd_keywords, resume_text)
+
+        logger.debug(
+            "span_analysis_engine | tfidf_time_ms=%.2f similarity_time_ms=%.2f jd_keywords=%d",
+            tfidf_time_ms,
+            similarity_time_ms,
+            len(jd_keywords),
+        )
+
+        logger.info(
+            "span_analysis_aggregate | tfidf_time_ms=%.2f similarity_time_ms=%.2f",
+            tfidf_time_ms,
+            similarity_time_ms,
+        )
 
         return {
             "similarity_score": similarity,

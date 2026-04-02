@@ -1,1 +1,26 @@
 2026-04-01 18:29:23 | INFO     | analysis.engine | Running full resume analysis
+2026-04-02 17:49:04 | INFO     | test | Test log message
+2026-04-02 17:56:13 | INFO     |  | test | Test log message
+2026-04-02 17:56:13 | INFO     |  | core.task_router | Dispatching task_type='job_application'
+2026-04-02 17:56:13 | INFO     |  | core.task_router | Task 'job_application' completed successfully
+2026-04-02 17:56:13 | ERROR    |  | core.llm_service | Unexpected LLM error on attempt 1: Invalid type for url.  Expected str or httpx.URL, got <class 'tuple'>: (b'http', b'localhost', 11434, b'/api/generate')
+2026-04-02 17:56:14 | ERROR    |  | core.llm_service | Unexpected LLM error on attempt 2: Invalid type for url.  Expected str or httpx.URL, got <class 'tuple'>: (b'http', b'localhost', 11434, b'/api/generate')
+2026-04-02 17:56:15 | ERROR    |  | core.llm_service | Unexpected LLM error on attempt 3: Invalid type for url.  Expected str or httpx.URL, got <class 'tuple'>: (b'http', b'localhost', 11434, b'/api/generate')
+2026-04-02 17:56:55 | INFO     |  | test | Test log message
+2026-04-02 17:56:55 | INFO     |  | core.task_router | Dispatching task_type='job_application'
+2026-04-02 17:56:55 | INFO     |  | core.task_router | Task 'job_application' completed successfully
+2026-04-02 17:56:55 | INFO     |  | core.llm_service | LLM call completed | model=mistral | elapsed=0.03s | response_len=11
+2026-04-02 18:02:14 | INFO     | 35adf809-859e-4ca4-9609-0b4b160e02a8 | main | route_span | method=GET path=/health request_id=35adf809-859e-4ca4-9609-0b4b160e02a8 latency_ms=24.31
+2026-04-02 18:02:14 | INFO     | 8a1eb271-bc62-40e6-82f8-fb84c7bcb5ad | main | route_span | method=GET path=/ request_id=8a1eb271-bc62-40e6-82f8-fb84c7bcb5ad latency_ms=0.57
+2026-04-02 18:02:14 | INFO     |  | test | Test log message
+2026-04-02 18:02:14 | INFO     |  | core.task_router | span_module_handler | task_type=job_application sub_task= handler_time_ms=0.00
+2026-04-02 18:02:14 | INFO     | test-request-id-123 | main | route_span | method=GET path=/health request_id=test-request-id-123 latency_ms=22.74
+2026-04-02 18:02:14 | INFO     |  | core.llm_service | span_llm_service_agg | model=mistral response_len=11 latency_ms=26.58
+2026-04-02 18:03:30 | INFO     | 9b2cc4bd-33f4-4c1c-88d4-9e6c26c4b407 | main | route_span | method=GET path=/health request_id=9b2cc4bd-33f4-4c1c-88d4-9e6c26c4b407 latency_ms=26.03
+2026-04-02 18:03:30 | INFO     | ad6f3407-55a4-4053-a16c-993cb65a3afa | main | route_span | method=GET path=/ request_id=ad6f3407-55a4-4053-a16c-993cb65a3afa latency_ms=0.34
+2026-04-02 18:03:30 | INFO     |  | test | Test log message
+2026-04-02 18:03:30 | INFO     |  | core.task_router | span_module_handler | task_type=job_application sub_task= handler_time_ms=0.00
+2026-04-02 18:03:30 | INFO     | test-request-id-123 | main | route_span | method=GET path=/health request_id=test-request-id-123 latency_ms=24.85
+2026-04-02 18:03:30 | INFO     |  | core.llm_service | span_llm_service_agg | model=mistral response_len=11 latency_ms=23.08
+2026-04-02 18:03:30 | INFO     |  | span | span_test_span | test_key=value duration_ms=10.08
+2026-04-02 18:03:30 | INFO     |  | span | span_test_span_agg | test_key=value duration_ms=10.08

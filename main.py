@@ -10,15 +10,18 @@ Wires together:
 """
 
 import os
+import time
+import uuid
 from contextlib import asynccontextmanager
 
 import uvicorn
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from config import settings
-from utils.logger import get_logger
+from utils.logger import get_logger, set_request_id, clear_request_id
 
 logger = get_logger("main")
 
@@ -106,6 +109,32 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+class RequestIDMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+        request.state.request_id = request_id
+        set_request_id(request_id)
+
+        route_start = time.time()
+        response = await call_next(request)
+        route_duration_ms = round((time.time() - route_start) * 1000, 2)
+
+        response.headers["X-Request-ID"] = request_id
+        logger.info(
+            "route_span | method=%s path=%s request_id=%s latency_ms=%.2f",
+            request.method,
+            request.url.path,
+            request_id,
+            route_duration_ms,
+        )
+
+        clear_request_id()
+        return response
+
+
+app.add_middleware(RequestIDMiddleware)
+
+
 # ─── CORS ─────────────────────────────────────────────────────────────────────
 app.add_middleware(
     CORSMiddleware,
@@ -152,7 +181,7 @@ async def health_check():
     from core.llm_service import llm_service
     from core.task_router import router
 
-    ollama_ok = llm_service.is_available()
+    ollama_ok = await llm_service.is_available_async()
     return JSONResponse({
         "status": "healthy" if ollama_ok else "degraded",
         "ollama": "connected" if ollama_ok else "unreachable",
@@ -167,9 +196,10 @@ async def system_status():
     from core.llm_service import llm_service
     from storage.database import db
 
+    models = await llm_service.list_models_async()
     return {
-        "ollama_available": llm_service.is_available(),
-        "available_models": llm_service.list_models(),
+        "ollama_available": await llm_service.is_available_async(),
+        "available_models": models,
         "active_model": settings.DEFAULT_MODEL,
         "database": settings.DATABASE_URL,
         "recent_tasks": db.get_task_history(limit=5),

@@ -6,6 +6,7 @@ All writes are async-safe via connection pooling.
 """
 
 import json
+import time
 from datetime import datetime, timezone
 from typing import Any, Optional
 
@@ -105,6 +106,7 @@ class DatabaseManager:
         score: Optional[float] = None,
     ) -> int:
         """Save a completed task to the database. Returns the new record ID."""
+        db_start = time.time()
         with self.get_session() as session:
             record = TaskRecord(
                 task_type=task_type,
@@ -119,7 +121,16 @@ class DatabaseManager:
             session.add(record)
             session.commit()
             session.refresh(record)
-            logger.debug("Saved task record id=%d, type=%s", record.id, task_type)
+            latency_ms = round((time.time() - db_start) * 1000, 2)
+            logger.debug(
+                "span_db_write | table=task_records record_id=%d write_time_ms=%.2f",
+                record.id,
+                latency_ms,
+            )
+            logger.info(
+                "span_db_write_agg | table=task_records write_time_ms=%.2f",
+                latency_ms,
+            )
             return record.id
 
     def get_task_history(
@@ -169,6 +180,7 @@ class DatabaseManager:
         url: Optional[str] = None,
     ) -> int:
         """Save a job application draft or record."""
+        db_start = time.time()
         with self.get_session() as session:
             app = JobApplication(
                 company_name=company_name,
@@ -181,7 +193,17 @@ class DatabaseManager:
             session.add(app)
             session.commit()
             session.refresh(app)
+            latency_ms = round((time.time() - db_start) * 1000, 2)
             logger.info("Saved job application id=%d for %s @ %s", app.id, role_title, company_name)
+            logger.debug(
+                "span_db_write | table=job_applications record_id=%d write_time_ms=%.2f",
+                app.id,
+                latency_ms,
+            )
+            logger.info(
+                "span_db_write_agg | table=job_applications write_time_ms=%.2f",
+                latency_ms,
+            )
             return app.id
 
     def get_job_applications(self, status: Optional[str] = None) -> list[dict]:

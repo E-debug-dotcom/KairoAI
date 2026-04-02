@@ -5,9 +5,10 @@ All Ollama calls go through this service. No module should call Ollama directly.
 Supports: standard completion, streaming, model switching, and retry logic.
 """
 
+import asyncio
 import json
 import time
-from typing import Generator, Optional
+from typing import AsyncGenerator, Generator, Optional
 
 import httpx
 
@@ -39,7 +40,7 @@ class LLMService:
 
     # ─── Primary interface ────────────────────────────────────────────────────
 
-    def complete(
+    async def complete_async(
         self,
         prompt: str,
         system_prompt: Optional[str] = None,
@@ -47,20 +48,7 @@ class LLMService:
         temperature: Optional[float] = None,
     ) -> str:
         """
-        Send a prompt to Ollama and return the full completion as a string.
-        This is the primary method used by all modules.
-
-        Args:
-            prompt: The user-facing prompt content.
-            system_prompt: Optional system instructions for role/context.
-            model: Override the default model for this call.
-            temperature: Override temperature for this call.
-
-        Returns:
-            The LLM's text response as a string.
-
-        Raises:
-            LLMServiceError: On network failure or unexpected response shape.
+        Async version of complete() that uses AsyncClient and supports retries/timeouts.
         """
         payload = self._build_payload(prompt, system_prompt, model, temperature)
         start_time = time.time()
@@ -75,8 +63,9 @@ class LLMService:
                     len(prompt),
                 )
 
-                with httpx.Client(timeout=self.timeout) as client:
-                    response = client.post(
+                timeout = httpx.Timeout(self.timeout, connect=self.timeout, read=self.timeout)
+                async with httpx.AsyncClient(timeout=timeout) as client:
+                    response = await client.post(
                         f"{self.base_url}/api/generate",
                         json=payload,
                     )
@@ -84,11 +73,20 @@ class LLMService:
 
                 result = self._parse_response(response.text)
                 elapsed = time.time() - start_time
-                logger.info(
-                    "LLM call completed | model=%s | elapsed=%.2fs | response_len=%d",
+                response_len = len(result)
+                logger.debug(
+                    "span_llm_service | model=%s attempt=%d prompt_len=%d response_len=%d latency_ms=%.2f",
                     payload["model"],
-                    elapsed,
-                    len(result),
+                    attempt,
+                    len(prompt),
+                    response_len,
+                    elapsed * 1000,
+                )
+                logger.info(
+                    "span_llm_service_agg | model=%s response_len=%d latency_ms=%.2f",
+                    payload["model"],
+                    response_len,
+                    elapsed * 1000,
                 )
                 return result
 
@@ -103,9 +101,9 @@ class LLMService:
                 logger.error("Ollama HTTP error: %s", str(e))
                 if attempt == self.max_retries:
                     raise LLMServiceError(f"Ollama returned HTTP error: {e.response.status_code}") from e
-                time.sleep(2 ** attempt)
+                await asyncio.sleep(2 ** attempt)
 
-            except httpx.ReadTimeout as e:
+            except (httpx.ReadTimeout, httpx.TimeoutException) as e:
                 logger.warning(
                     "LLM request timed out on attempt %d/%d after %ss (model=%s)",
                     attempt,
@@ -118,36 +116,48 @@ class LLMService:
                         f"LLM timed out after {self.timeout}s. "
                         "Try a shorter prompt, smaller top_k, or increase OLLAMA_TIMEOUT."
                     ) from e
-                time.sleep(2 ** attempt)
+                await asyncio.sleep(2 ** attempt)
 
             except Exception as e:
                 logger.error("Unexpected LLM error on attempt %d: %s", attempt, str(e))
                 if attempt == self.max_retries:
                     raise LLMServiceError(f"LLM call failed after {self.max_retries} attempts: {str(e)}") from e
-                time.sleep(1)
+                await asyncio.sleep(1)
 
         raise LLMServiceError("LLM call exhausted all retries without a result.")
 
-    def stream(
+    def complete(
         self,
         prompt: str,
         system_prompt: Optional[str] = None,
         model: Optional[str] = None,
-    ) -> Generator[str, None, None]:
-        """
-        Stream the LLM response token-by-token.
-        Useful for long-form content or real-time UI feedback.
+        temperature: Optional[float] = None,
+    ) -> str:
+        """Sync wrapper for complete_async for compatibility with non-async callers."""
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            return asyncio.run(self.complete_async(prompt, system_prompt, model, temperature))
+        else:
+            raise RuntimeError("LLMService.complete should not be called in async context; use complete_async instead.")
 
-        Yields:
-            Individual text chunks as they arrive from Ollama.
+    async def stream_async(
+        self,
+        prompt: str,
+        system_prompt: Optional[str] = None,
+        model: Optional[str] = None,
+    ) -> AsyncGenerator[str, None]:
+        """
+        Async streaming version using httpx.AsyncClient and aiorw.
         """
         payload = self._build_payload(prompt, system_prompt, model, stream=True)
 
         try:
-            with httpx.Client(timeout=self.timeout) as client:
-                with client.stream("POST", f"{self.base_url}/api/generate", json=payload) as response:
+            timeout = httpx.Timeout(self.timeout, connect=self.timeout, read=self.timeout)
+            async with httpx.AsyncClient(timeout=timeout) as client:
+                async with client.stream("POST", f"{self.base_url}/api/generate", json=payload) as response:
                     response.raise_for_status()
-                    for line in response.iter_lines():
+                    async for line in response.aiter_lines():
                         if not line:
                             continue
                         try:
@@ -162,13 +172,25 @@ class LLMService:
         except httpx.ConnectError as e:
             raise LLMServiceError(f"Cannot connect to Ollama: {str(e)}") from e
 
+    def stream(
+        self,
+        prompt: str,
+        system_prompt: Optional[str] = None,
+        model: Optional[str] = None,
+    ) -> Generator[str, None, None]:
+        """Blocking streaming compatibility wrapper."""
+        try:
+            return asyncio.run(self.stream_async(prompt, system_prompt, model))
+        except RuntimeError:
+            raise RuntimeError("LLMService.stream should not be called from a running event loop. Use stream_async instead.")
+
     # ─── Model utilities ──────────────────────────────────────────────────────
 
-    def list_models(self) -> list[str]:
-        """Return names of all locally available Ollama models."""
+    async def list_models_async(self) -> list[str]:
+        """Return names of all locally available Ollama models asynchronously."""
         try:
-            with httpx.Client(timeout=10) as client:
-                response = client.get(f"{self.base_url}/api/tags")
+            async with httpx.AsyncClient(timeout=10) as client:
+                response = await client.get(f"{self.base_url}/api/tags")
                 response.raise_for_status()
                 data = response.json()
                 return [m["name"] for m in data.get("models", [])]
@@ -176,14 +198,26 @@ class LLMService:
             logger.warning("Could not list Ollama models: %s", str(e))
             return []
 
-    def is_available(self) -> bool:
-        """Quick health check — returns True if Ollama is reachable."""
+    def list_models(self) -> list[str]:
         try:
-            with httpx.Client(timeout=5) as client:
-                client.get(f"{self.base_url}/api/tags").raise_for_status()
+            return asyncio.run(self.list_models_async())
+        except RuntimeError:
+            raise RuntimeError("LLMService.list_models should not be called in async context; use list_models_async.")
+
+    async def is_available_async(self) -> bool:
+        """Quick health check — returns True if Ollama is reachable asynchronously."""
+        try:
+            async with httpx.AsyncClient(timeout=5) as client:
+                await client.get(f"{self.base_url}/api/tags")
             return True
         except Exception:
             return False
+
+    def is_available(self) -> bool:
+        try:
+            return asyncio.run(self.is_available_async())
+        except RuntimeError:
+            raise RuntimeError("LLMService.is_available should not be called in async context; use is_available_async.")
 
     # ─── Internal helpers ─────────────────────────────────────────────────────
 

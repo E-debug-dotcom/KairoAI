@@ -2,9 +2,15 @@
 utils/helpers.py — Shared utility functions used across modules.
 """
 
+import contextlib
 import re
+import time
 import unicodedata
 from typing import Any
+
+from utils.logger import get_logger
+
+span_logger = get_logger("span")
 
 
 def clean_text(text: str) -> str:
@@ -83,3 +89,39 @@ def safe_dict_get(d: dict, *keys: str, default: Any = None) -> Any:
 def format_list_as_bullets(items: list[str]) -> str:
     """Convert a list of strings to a markdown bullet list."""
     return "\n".join(f"• {item}" for item in items)
+
+
+import contextlib
+import time
+from typing import Any
+from utils.logger import get_logger
+
+span_logger = get_logger("span")
+
+@contextlib.contextmanager
+def span(
+    name: str,
+    level: str = "debug",
+    aggregate: bool = False,
+    **attrs: Any,
+):
+    """Context manager for timing and structured span logging."""
+    start = time.time()
+    try:
+        yield
+    finally:
+        duration_ms = round((time.time() - start) * 1000, 2)
+        fields = " ".join(f"{k}={v}" for k, v in attrs.items())
+        fields = f"{fields} " if fields else ""
+
+        msg = f"span_{name} | {fields}duration_ms={duration_ms}"
+        if level.lower() == "debug":
+            span_logger.debug(msg)
+        elif level.lower() == "info":
+            span_logger.info(msg)
+        else:
+            span_logger.info(msg)
+
+        if aggregate:
+            agg_msg = f"span_{name}_agg | {fields}duration_ms={duration_ms}"
+            span_logger.info(agg_msg)

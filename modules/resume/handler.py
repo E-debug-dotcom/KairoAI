@@ -100,7 +100,7 @@ class ResumeHandler:
         except Exception as e:
             return formatter.error("resume", f"Prompt rendering failed: {str(e)}")
 
-        llm_response = llm_service.complete(
+        llm_response = await llm_service.complete_async(
             prompt=prompt,
             system_prompt=RESUME_SYSTEM_PROMPT,
         )
@@ -170,7 +170,7 @@ class ResumeHandler:
                 resume_text=truncate_text(resume_text, 3000),
                 score=analysis["similarity_score"],
             )
-            narrative = llm_service.complete(
+            narrative = await llm_service.complete_async(
                 prompt=prompt,
                 system_prompt=RESUME_SYSTEM_PROMPT,
             )
@@ -220,7 +220,7 @@ class ResumeHandler:
         except Exception as e:
             return formatter.error("resume", f"Prompt error: {str(e)}")
 
-        cover_letter = llm_service.complete(
+        cover_letter = await llm_service.complete_async(
             prompt=prompt,
             system_prompt=RESUME_SYSTEM_PROMPT,
             temperature=0.5,  # Slightly more creative for cover letters
@@ -259,7 +259,7 @@ class ResumeHandler:
         except Exception as e:
             return formatter.error("resume", f"Prompt error: {str(e)}")
 
-        result = llm_service.complete(
+        result = await llm_service.complete_async(
             prompt=prompt,
             system_prompt=RESUME_SYSTEM_PROMPT,
         )

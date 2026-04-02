@@ -70,7 +70,7 @@ class CodeGenHandler:
             return formatter.error("code", f"Prompt error: {str(e)}")
 
         start = time.time()
-        code = llm_service.complete(
+        code = await llm_service.complete_async(
             prompt=prompt,
             system_prompt=CODE_SYSTEM_PROMPT,
             temperature=0.2,  # Low temp for code — consistency over creativity
@@ -100,7 +100,7 @@ class CodeGenHandler:
             return formatter.error("code", f"Prompt error: {str(e)}")
 
         start = time.time()
-        review = llm_service.complete(prompt=prompt, system_prompt=CODE_SYSTEM_PROMPT, temperature=0.2)
+        review = await llm_service.complete_async(prompt=prompt, system_prompt=CODE_SYSTEM_PROMPT, temperature=0.2)
         duration = time.time() - start
 
         return formatter.success(
@@ -126,7 +126,7 @@ class CodeGenHandler:
             return formatter.error("code", f"Prompt error: {str(e)}")
 
         start = time.time()
-        explanation = llm_service.complete(prompt=prompt, system_prompt=CODE_SYSTEM_PROMPT)
+        explanation = await llm_service.complete_async(prompt=prompt, system_prompt=CODE_SYSTEM_PROMPT)
         duration = time.time() - start
 
         return formatter.success(
