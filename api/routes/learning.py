@@ -23,11 +23,6 @@ class SearchKnowledgeRequest(BaseModel):
     top_k: int = Field(5, ge=1, le=15)
 
 
-class ListSourcesRequest(BaseModel):
-    category: Optional[str] = None
-    limit: int = Field(200, ge=1, le=500)
-
-
 @learning_route.post("/text", summary="Teach the assistant using raw text")
 async def teach_text(request: TeachTextRequest):
     result = await learning_handler.handle(
@@ -73,20 +68,6 @@ async def search_knowledge(request: SearchKnowledgeRequest):
             "query": request.query,
             "category": request.category,
             "top_k": request.top_k,
-        }
-    )
-    if result["status"] == "error":
-        raise HTTPException(status_code=422, detail=result["error"])
-    return result
-
-
-@learning_route.post("/sources", summary="List learned document sources")
-async def list_sources(request: ListSourcesRequest):
-    result = await learning_handler.handle(
-        {
-            "sub_task": "list_sources",
-            "category": request.category,
-            "limit": request.limit,
         }
     )
     if result["status"] == "error":

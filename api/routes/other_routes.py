@@ -66,7 +66,7 @@ class AssistantChatRequest(BaseModel):
     message: str = Field(..., description="User chat message")
     session_id: str = Field("default", description="Conversation/session identifier")
     category: Optional[str] = Field(None, description="Optional memory category filter")
-    top_k: int = Field(3, ge=1, le=10, description="Number of memory chunks to retrieve")
+    top_k: int = Field(4, ge=1, le=10, description="Number of memory chunks to retrieve")
 
 
 # ─── Assistant endpoints ──────────────────────────────────────────────────────

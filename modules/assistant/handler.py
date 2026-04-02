@@ -154,11 +154,11 @@ class AssistantHandler:
 
         session_id = payload.get("session_id", "default")
         category = payload.get("category")
-        top_k = int(payload.get("top_k", 3))
+        top_k = int(payload.get("top_k", 4))
 
         memory_items = vector_store.query(query_text=message, top_k=top_k, category=category)
         memory_block = "\n".join(
-            f"- ({item['category']} | {item['source']}) {truncate_text(item['text'], 240)}"
+            f"- ({item['category']} | {item['source']}) {truncate_text(item['text'], 400)}"
             for item in memory_items
         )
 
@@ -170,10 +170,7 @@ class AssistantHandler:
         )
 
         start = time.time()
-        try:
-            answer = llm_service.complete(prompt=prompt, system_prompt=ASSISTANT_SYSTEM_PROMPT)
-        except Exception as e:
-            return formatter.error("assistant", f"LLM request failed: {str(e)}")
+        answer = llm_service.complete(prompt=prompt, system_prompt=ASSISTANT_SYSTEM_PROMPT)
         duration = time.time() - start
 
         db.save_task(

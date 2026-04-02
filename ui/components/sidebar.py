@@ -24,12 +24,8 @@ def render_sidebar(client: APIClient) -> None:
                     with st.spinner("Saving knowledge..."):
                         try:
                             result = client.teach_text(teach_input, category_text)
-                            data = result.get("data", {})
-                            stored = data.get("stored_chunks", 0)
-                            if data.get("skipped_existing"):
-                                st.info("This content already exists in memory. Skipped duplicate ingest.")
-                            else:
-                                st.success(f"Saved successfully ({stored} chunks).")
+                            stored = result.get("data", {}).get("stored_chunks", 0)
+                            st.success(f"Saved successfully ({stored} chunks).")
                         except APIClientError as e:
                             st.error(str(e))
 
@@ -51,33 +47,10 @@ def render_sidebar(client: APIClient) -> None:
                                 file_bytes=upload.read(),
                                 category=category_doc,
                             )
-                            data = result.get("data", {})
-                            stored = data.get("stored_chunks", 0)
-                            if data.get("skipped_existing"):
-                                st.info("This document is already in memory. Skipped duplicate ingest.")
-                            else:
-                                st.success(f"Document ingested ({stored} chunks).")
+                            stored = result.get("data", {}).get("stored_chunks", 0)
+                            st.success(f"Document ingested ({stored} chunks).")
                         except APIClientError as e:
                             st.error(str(e))
-
-        with st.expander("Learned Documents"):
-            source_category = st.selectbox(
-                "Source category",
-                ["all"] + CATEGORY_OPTIONS,
-                key="source_list_category",
-            )
-            if st.button("Refresh Sources", key="sources_refresh_btn", use_container_width=True):
-                with st.spinner("Loading learned sources..."):
-                    try:
-                        result = client.list_sources(
-                            category=None if source_category == "all" else source_category,
-                        )
-                        st.session_state.learned_sources = result.get("data", {}).get("sources", [])
-                    except APIClientError as e:
-                        st.error(str(e))
-                        st.session_state.learned_sources = []
-
-            _render_source_list(st.session_state.learned_sources)
 
         with st.expander("Search Memory"):
             search_query = st.text_input("Memory query", key="memory_query")
@@ -113,16 +86,3 @@ def _render_search_results(matches: list[dict]) -> None:
     for idx, match in enumerate(matches, start=1):
         st.markdown(f"**{idx}. {match.get('source', 'unknown')}** ({match.get('category', 'general')})")
         st.code(match.get("text", ""), language="markdown")
-
-
-def _render_source_list(items: list[dict]) -> None:
-    if not items:
-        st.caption("No learned documents yet.")
-        return
-
-    for idx, item in enumerate(items, start=1):
-        st.markdown(
-            f"**{idx}. {item.get('source', 'unknown')}** "
-            f"({item.get('category', 'general')}) — "
-            f"{item.get('chunk_count', 0)} chunks"
-        )
