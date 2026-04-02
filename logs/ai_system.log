@@ -37,3 +37,16 @@
 2026-04-02 18:12:23 | INFO     | a46ee08f-882d-4b8b-a3ec-4aad7a4fb9fb | main | route_span | method=GET path=/health request_id=a46ee08f-882d-4b8b-a3ec-4aad7a4fb9fb latency_ms=24.54
 2026-04-02 18:12:23 | INFO     | 018796ba-288c-4c3e-a687-51d4f47ac5bb | main | route_span | method=GET path=/ request_id=018796ba-288c-4c3e-a687-51d4f47ac5bb latency_ms=0.34
 2026-04-02 18:12:23 | INFO     |  | test | Test log message
+2026-04-02 18:20:32 | INFO     |  | core.task_router | span_module_handler | task_type=job_application sub_task= handler_time_ms=0.00
+2026-04-02 18:20:32 | WARNING  |  | storage.vector_store | span_vector_store | operation=query top_k=5 n_results=0 latency_ms=0.03 invalid_collection_error=collection has insufficient records
+2026-04-02 18:20:32 | INFO     |  | storage.vector_store | span_vector_store_agg | operation=query n_results=0 latency_ms=0.03
+2026-04-02 18:20:32 | INFO     | test-request-id-123 | main | route_span | method=GET path=/health request_id=test-request-id-123 latency_ms=30.79
+2026-04-02 18:20:32 | INFO     |  | core.llm_service | span_llm_service_agg | model=mistral response_len=11 latency_ms=22.18
+2026-04-02 18:20:32 | INFO     |  | span | span_test_span | test_key=value duration_ms=10.08
+2026-04-02 18:20:32 | INFO     |  | span | span_test_span_agg | test_key=value duration_ms=10.08
+2026-04-02 18:20:32 | INFO     |  | core.decision_engine | span_decision_engine_agg | decision_type=memory_only memory_score=0.950 latency_ms=0.02
+2026-04-02 18:20:32 | INFO     | 1af6131a-0f4e-4a99-acca-976ed568781a | core.decision_engine | span_decision_engine_agg | decision_type=memory_only memory_score=0.900 latency_ms=0.01
+2026-04-02 18:20:32 | INFO     | 1af6131a-0f4e-4a99-acca-976ed568781a | main | route_span | method=POST path=/api/v1/task/ request_id=1af6131a-0f4e-4a99-acca-976ed568781a latency_ms=2.14
+2026-04-02 18:20:32 | INFO     | bce5f40e-9d79-4f5b-9819-75af66b49f01 | main | route_span | method=GET path=/health request_id=bce5f40e-9d79-4f5b-9819-75af66b49f01 latency_ms=36.14
+2026-04-02 18:20:32 | INFO     | 3aecc4c1-4515-4fb8-a822-d35406049f70 | main | route_span | method=GET path=/ request_id=3aecc4c1-4515-4fb8-a822-d35406049f70 latency_ms=0.24
+2026-04-02 18:20:32 | INFO     |  | test | Test log message

@@ -16,6 +16,9 @@ from pydantic import BaseModel, Field
 from typing import Any, Optional
 
 from core.task_router import router as task_router, TaskNotFoundError
+from core.decision_engine import decision_engine, DecisionOutcome
+from core.session_memory import session_memory
+from storage.vector_store import vector_store
 from utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -48,8 +51,38 @@ class GenericTaskRequest(BaseModel):
 async def dispatch_task(request: GenericTaskRequest):
     payload = {**request.payload, "sub_task": request.sub_task or ""}
     try:
+        decision = decision_engine.evaluate(request.task_type, payload)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    if request.payload.get("session_id"):
+        session_id = request.payload.get("session_id")
+        session_memory.append_user(session_id, str(request.payload))
+        payload["session_history"] = session_memory.get_history(session_id)
+
+    try:
+        if decision.decision_type == "memory_only":
+            query_text = request.payload.get("query") or request.payload.get("question") or request.payload.get("input") or ""
+            memory_hits = vector_store.query(query_text=query_text, top_k=3)
+            response = {
+                "status": "success",
+                "source": "memory",
+                "items": memory_hits,
+                "decision": decision.decision_type,
+                "request_id": request.payload.get("session_id") or None,
+            }
+            if request.payload.get("session_id"):
+                session_memory.append_assistant(request.payload.get("session_id"), str(response))
+            return response
+
+        # LLM path (llm_only / tools_llm / full_pipeline)
         result = await task_router.dispatch(request.task_type, payload)
+
+        if request.payload.get("session_id"):
+            session_memory.append_assistant(request.payload.get("session_id"), str(result))
+
         return result
+
     except TaskNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:

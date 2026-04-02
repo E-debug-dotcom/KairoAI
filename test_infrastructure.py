@@ -98,3 +98,49 @@ def test_span_context_manager(caplog):
     assert "span_test_span" in caplog.text
     assert "span_test_span_agg" in caplog.text
     assert "test_key=value" in caplog.text
+
+
+def test_decision_engine_high_memory_uses_memory_only(monkeypatch):
+    from core.decision_engine import decision_engine
+    from storage.vector_store import vector_store
+
+    monkeypatch.setattr(vector_store, "query", lambda query_text, top_k=3, category=None: [{"distance": 0.05, "text": "cached"}])
+
+    outcome = decision_engine.evaluate("assistant", {"question": "How are you?"})
+    assert outcome.decision_type == "memory_only"
+    assert outcome.use_memory is True
+    assert outcome.use_llm is False
+
+
+def test_session_memory_stores_and_prunes():
+    from core.session_memory import session_memory
+
+    session_id = "session-abc"
+    session_memory.append_user(session_id, "Hello")
+    session_memory.append_assistant(session_id, "Hi there")
+    session_memory.append_user(session_id, "ok")
+    session_memory.prune_low_value(session_id)
+
+    history = session_memory.get_history(session_id)
+    assert len(history) == 2
+    assert history[0]["role"] == "user"
+    assert history[1]["role"] == "assistant"
+
+
+def test_task_route_decision_memory_only(monkeypatch):
+    from fastapi.testclient import TestClient
+    from main import app
+    from storage.vector_store import vector_store
+
+    monkeypatch.setattr(vector_store, "query", lambda query_text, top_k=3, category=None: [{"distance": 0.1, "text": "cached summary"}])
+
+    client = TestClient(app)
+    response = client.post(
+        "/api/v1/task/",
+        json={"task_type": "assistant", "payload": {"question": "a short user query"}},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["source"] == "memory"
+    assert "items" in body

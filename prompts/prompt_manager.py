@@ -53,9 +53,16 @@ class PromptManager:
             )
 
         template = self._templates[key]
+        session_history = kwargs.pop("session_history", None)
         try:
             start = time.time()
             rendered = template.format(**kwargs)
+            if session_history:
+                history_str = "\n\nRecent conversation history:\n"
+                for entry in session_history:
+                    history_str += f"[{entry.get('role')}]: {entry.get('text')}\n"
+                rendered = f"{rendered}{history_str}"
+
             render_time_ms = round((time.time() - start) * 1000, 2)
             logger.debug(
                 "span_prompt_render | template_key=%s render_time_ms=%.2f prompt_len=%d",
