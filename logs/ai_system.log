@@ -34,3 +34,6 @@
 2026-04-02 18:10:42 | INFO     | 15261330-82bf-47c4-a2be-10284088d50b | main | route_span | method=GET path=/health request_id=15261330-82bf-47c4-a2be-10284088d50b latency_ms=36.62
 2026-04-02 18:10:42 | INFO     | 9aa20084-c57b-4b20-8435-678b7df32d3c | main | route_span | method=GET path=/ request_id=9aa20084-c57b-4b20-8435-678b7df32d3c latency_ms=1.63
 2026-04-02 18:10:42 | INFO     |  | test | Test log message
+2026-04-02 18:12:23 | INFO     | a46ee08f-882d-4b8b-a3ec-4aad7a4fb9fb | main | route_span | method=GET path=/health request_id=a46ee08f-882d-4b8b-a3ec-4aad7a4fb9fb latency_ms=24.54
+2026-04-02 18:12:23 | INFO     | 018796ba-288c-4c3e-a687-51d4f47ac5bb | main | route_span | method=GET path=/ request_id=018796ba-288c-4c3e-a687-51d4f47ac5bb latency_ms=0.34
+2026-04-02 18:12:23 | INFO     |  | test | Test log message
