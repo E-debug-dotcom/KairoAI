@@ -61,6 +61,14 @@ class AssistantExplainRequest(BaseModel):
         }
 
 
+
+class AssistantChatRequest(BaseModel):
+    message: str = Field(..., description="User chat message")
+    session_id: str = Field("default", description="Conversation/session identifier")
+    category: Optional[str] = Field(None, description="Optional memory category filter")
+    top_k: int = Field(3, ge=1, le=10, description="Number of memory chunks to retrieve")
+
+
 # ─── Assistant endpoints ──────────────────────────────────────────────────────
 
 @assistant_route.post(
@@ -92,6 +100,25 @@ async def assistant_explain(request: AssistantExplainRequest):
         "topic": request.topic,
         "level": request.level,
         "context": request.context or "",
+    }
+    result = await assistant_handler.handle(payload)
+    if result["status"] == "error":
+        raise HTTPException(status_code=422, detail=result["error"])
+    return result
+
+
+@assistant_route.post(
+    "/chat",
+    summary="Interactive chat with memory retrieval",
+    description="Conversational endpoint that grounds responses using taught memory.",
+)
+async def assistant_chat(request: AssistantChatRequest):
+    payload = {
+        "sub_task": "chat",
+        "message": request.message,
+        "session_id": request.session_id,
+        "category": request.category,
+        "top_k": request.top_k,
     }
     result = await assistant_handler.handle(payload)
     if result["status"] == "error":

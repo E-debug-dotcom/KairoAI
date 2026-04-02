@@ -15,6 +15,7 @@ from core.output_formatter import formatter
 from prompts.prompt_manager import prompt_manager
 from prompts.assistant_prompts import ASSISTANT_SYSTEM_PROMPT
 from storage.database import db
+from storage.vector_store import vector_store
 from utils.logger import get_logger
 from utils.helpers import truncate_text
 
@@ -41,6 +42,7 @@ class AssistantHandler:
         dispatch = {
             "query": self._query,
             "explain": self._explain,
+            "chat": self._chat,
         }
 
         if sub_task not in dispatch:
@@ -81,10 +83,13 @@ class AssistantHandler:
             prompt = f"{history_block}\n\n{prompt}"
 
         start = time.time()
-        response = llm_service.complete(
-            prompt=prompt,
-            system_prompt=ASSISTANT_SYSTEM_PROMPT,
-        )
+        try:
+            response = llm_service.complete(
+                prompt=prompt,
+                system_prompt=ASSISTANT_SYSTEM_PROMPT,
+            )
+        except Exception as e:
+            return formatter.error("assistant", f"LLM request failed: {str(e)}")
         duration = time.time() - start
 
         db.save_task(
@@ -126,15 +131,66 @@ class AssistantHandler:
             return formatter.error("assistant", f"Prompt error: {str(e)}")
 
         start = time.time()
-        response = llm_service.complete(
-            prompt=prompt,
-            system_prompt=ASSISTANT_SYSTEM_PROMPT,
-        )
+        try:
+            response = llm_service.complete(
+                prompt=prompt,
+                system_prompt=ASSISTANT_SYSTEM_PROMPT,
+            )
+        except Exception as e:
+            return formatter.error("assistant", f"LLM request failed: {str(e)}")
         duration = time.time() - start
 
         return formatter.success(
             "assistant",
             {"explanation": response, "topic": topic, "level": level},
+            meta={"duration_seconds": round(duration, 2), "model": llm_service.model},
+        )
+
+
+    async def _chat(self, payload: dict) -> dict:
+        message = payload.get("message", "").strip()
+        if not message:
+            return formatter.error("assistant", "Field 'message' is required.")
+
+        session_id = payload.get("session_id", "default")
+        category = payload.get("category")
+        top_k = int(payload.get("top_k", 3))
+
+        memory_items = vector_store.query(query_text=message, top_k=top_k, category=category)
+        memory_block = "\n".join(
+            f"- ({item['category']} | {item['source']}) {truncate_text(item['text'], 240)}"
+            for item in memory_items
+        )
+
+        prompt = prompt_manager.render(
+            "assistant",
+            "chat",
+            message=message,
+            memory_block=memory_block or "No prior knowledge retrieved.",
+        )
+
+        start = time.time()
+        try:
+            answer = llm_service.complete(prompt=prompt, system_prompt=ASSISTANT_SYSTEM_PROMPT)
+        except Exception as e:
+            return formatter.error("assistant", f"LLM request failed: {str(e)}")
+        duration = time.time() - start
+
+        db.save_task(
+            task_type="assistant",
+            input_summary={"sub_task": "chat", "session_id": session_id, "message": message[:200]},
+            result=formatter.success("assistant", {"answer": answer}),
+            duration_seconds=duration,
+            model_used=llm_service.model,
+        )
+
+        return formatter.success(
+            "assistant",
+            {
+                "answer": answer,
+                "session_id": session_id,
+                "retrieved_memory": memory_items,
+            },
             meta={"duration_seconds": round(duration, 2), "model": llm_service.model},
         )
 
