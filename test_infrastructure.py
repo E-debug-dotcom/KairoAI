@@ -25,6 +25,19 @@ async def test_task_router_alias_dispatch():
     assert result["payload"] == {"x": 1}
 
 
+@pytest.mark.asyncio
+async def test_task_router_resume_coach_dispatch(monkeypatch):
+    router = TaskRouter()
+    async def dummy(payload):
+        return {"ok": True, "payload": payload}
+
+    router.register("resume_coach", dummy)
+
+    result = await router.dispatch("resume_coach", {"x": 1})
+    assert result["ok"]
+    assert result["payload"] == {"x": 1}
+
+
 def test_vector_store_query_on_empty_collection(monkeypatch):
     store = VectorStore()
     store._initialized = True

@@ -58,12 +58,14 @@ async def lifespan(app: FastAPI):
     # 3. Register module handlers with the task router
     from core.task_router import router
     from modules.resume.handler import resume_handler
+    from modules.resume_coach.handler import resume_coach_handler
     from modules.assistant.handler import assistant_handler
     from modules.job_application.handler import job_application_handler
     from modules.code_gen.handler import code_gen_handler
     from modules.learning.handler import learning_handler
 
     router.register("resume", resume_handler.handle)
+    router.register("resume_coach", resume_coach_handler.handle)
     router.register("assistant", assistant_handler.handle)
     router.register("job_application", job_application_handler.handle)
     router.register("code", code_gen_handler.handle)

@@ -63,3 +63,30 @@
 2026-04-02 18:25:03 | INFO     | 16392eee-58b7-4a55-ade7-7b49b4735259 | main | route_span | method=GET path=/health request_id=16392eee-58b7-4a55-ade7-7b49b4735259 latency_ms=24.07
 2026-04-02 18:25:03 | INFO     | dbb9a586-c4ac-4056-a03c-6ba30e768853 | main | route_span | method=GET path=/ request_id=dbb9a586-c4ac-4056-a03c-6ba30e768853 latency_ms=0.38
 2026-04-02 18:25:03 | INFO     |  | test | Test log message
+2026-04-02 19:22:40 | INFO     |  | core.task_router | span_module_handler | task_type=job_application sub_task= handler_time_ms=0.00
+2026-04-02 19:22:40 | WARNING  |  | storage.vector_store | span_vector_store | operation=query top_k=5 n_results=0 latency_ms=0.02 invalid_collection_error=collection has insufficient records
+2026-04-02 19:22:40 | INFO     |  | storage.vector_store | span_vector_store_agg | operation=query n_results=0 latency_ms=0.02
+2026-04-02 19:22:40 | INFO     | test-request-id-123 | main | route_span | method=GET path=/health request_id=test-request-id-123 latency_ms=24.70
+2026-04-02 19:22:40 | INFO     |  | core.llm_service | span_llm_service_agg | model=mistral response_len=11 latency_ms=29.40
+2026-04-02 19:22:40 | INFO     |  | span | span_test_span | test_key=value duration_ms=11.36
+2026-04-02 19:22:40 | INFO     |  | span | span_test_span_agg | test_key=value duration_ms=11.36
+2026-04-02 19:22:40 | INFO     |  | core.decision_engine | span_decision_engine_agg | decision_type=memory_only memory_score=0.950 latency_ms=0.02
+2026-04-02 19:22:40 | INFO     | ed449b2e-0b7a-4547-b57e-55becedffdba | core.decision_engine | span_decision_engine_agg | decision_type=memory_only memory_score=0.900 latency_ms=0.01
+2026-04-02 19:22:40 | INFO     | ed449b2e-0b7a-4547-b57e-55becedffdba | main | route_span | method=POST path=/api/v1/task/ request_id=ed449b2e-0b7a-4547-b57e-55becedffdba latency_ms=2.16
+2026-04-02 19:22:40 | INFO     | d61dc89a-78fb-47fd-ab40-ca1ac33e9987 | main | route_span | method=GET path=/health request_id=d61dc89a-78fb-47fd-ab40-ca1ac33e9987 latency_ms=28.31
+2026-04-02 19:22:40 | INFO     | 4c315aa1-ff00-411f-9394-9e39c01eb467 | main | route_span | method=GET path=/ request_id=4c315aa1-ff00-411f-9394-9e39c01eb467 latency_ms=0.25
+2026-04-02 19:22:40 | INFO     |  | test | Test log message
+2026-04-02 19:22:52 | INFO     |  | core.task_router | span_module_handler | task_type=job_application sub_task= handler_time_ms=0.00
+2026-04-02 19:22:52 | INFO     |  | core.task_router | span_module_handler | task_type=resume_coach sub_task= handler_time_ms=0.00
+2026-04-02 19:22:52 | WARNING  |  | storage.vector_store | span_vector_store | operation=query top_k=5 n_results=0 latency_ms=0.03 invalid_collection_error=collection has insufficient records
+2026-04-02 19:22:52 | INFO     |  | storage.vector_store | span_vector_store_agg | operation=query n_results=0 latency_ms=0.03
+2026-04-02 19:22:52 | INFO     | test-request-id-123 | main | route_span | method=GET path=/health request_id=test-request-id-123 latency_ms=25.56
+2026-04-02 19:22:52 | INFO     |  | core.llm_service | span_llm_service_agg | model=mistral response_len=11 latency_ms=23.74
+2026-04-02 19:22:52 | INFO     |  | span | span_test_span | test_key=value duration_ms=10.07
+2026-04-02 19:22:52 | INFO     |  | span | span_test_span_agg | test_key=value duration_ms=10.07
+2026-04-02 19:22:52 | INFO     |  | core.decision_engine | span_decision_engine_agg | decision_type=memory_only memory_score=0.950 latency_ms=0.02
+2026-04-02 19:22:52 | INFO     | 66ce218b-9c9e-4340-bb11-c6bb54586218 | core.decision_engine | span_decision_engine_agg | decision_type=memory_only memory_score=0.900 latency_ms=0.02
+2026-04-02 19:22:52 | INFO     | 66ce218b-9c9e-4340-bb11-c6bb54586218 | main | route_span | method=POST path=/api/v1/task/ request_id=66ce218b-9c9e-4340-bb11-c6bb54586218 latency_ms=2.79
+2026-04-02 19:22:52 | INFO     | 8bb3a3f8-3f0e-41d6-a6f2-8786783b002b | main | route_span | method=GET path=/health request_id=8bb3a3f8-3f0e-41d6-a6f2-8786783b002b latency_ms=34.79
+2026-04-02 19:22:52 | INFO     | 53fa7747-5176-4507-9b9c-66878f906b80 | main | route_span | method=GET path=/ request_id=53fa7747-5176-4507-9b9c-66878f906b80 latency_ms=0.49
+2026-04-02 19:22:52 | INFO     |  | test | Test log message

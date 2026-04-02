@@ -34,6 +34,7 @@ class TaskRouter:
         "job_application": "job_application",
         "assistant": "assistant",
         "resume": "resume",
+        "resume_coach": "resume_coach",
         "code": "code",
         "learning": "learning",
     }
