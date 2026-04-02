@@ -351,3 +351,55 @@ response = llm.complete("Your prompt here")
 ```
 
 Available local models: `ollama list`
+
+---
+
+## New Phase 1+ Features (Decision Engine + Session Memory)
+
+### Decision Engine
+- Added core component: `core/decision_engine.py`
+- Evaluates each `/api/v1/task` request before invoking module handlers
+- Decision outcomes:
+  - `memory_only`
+  - `llm_only`
+  - `tools_llm` (placeholder for future tool integration)
+  - `full_pipeline`
+- Rules in place:
+  - `resume` requires `job_description`
+  - `force_llm`/`force_tools` override
+  - assistant/learning + high memory similarity can skip LLM
+  - short queries use LLM directly
+- Observability spans:
+  - `span_decision_engine` (DEBUG)
+  - `span_decision_engine_agg` (INFO)
+
+### Session Memory
+- Added in `core/session_memory.py` with short-term rolling history
+- session key: `session_id` (optional in payload)
+- stores user + assistant messages (default max 10)
+- removes low-value tokens in pruning (`ok`, `thanks`, etc.)
+- auto-injected into prompt rendering via `prompt_manager` session_history support
+
+### Task route behavior
+- `/api/v1/task` now evaluates decision first:
+  - `memory_only` returns vector search results directly
+  - `llm_only/full_pipeline` continues to TaskRouter as before
+- `session_id` history is appended during request lifecycle
+- the task route still supports all existing task types and aliases
+
+### Example
+```bash
+curl -X POST http://localhost:8000/api/v1/task/ \
+  -H "Content-Type: application/json" \
+  -d '{
+    "task_type": "assistant",
+    "payload": {
+      "question": "What is SOC2 compliance?",
+      "session_id": "user-demo-1"
+    }
+  }'
+```
+
+- if memory match is strong, returns memory-first payload
+- otherwise falls back to existing module behavior
+
