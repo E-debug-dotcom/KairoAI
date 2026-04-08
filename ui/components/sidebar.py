@@ -52,6 +52,30 @@ def render_sidebar(client: APIClient) -> None:
                         except APIClientError as e:
                             st.error(str(e))
 
+        with st.expander("Teach via Dataset"):
+            category_dataset = st.selectbox("Dataset category", CATEGORY_OPTIONS, key="teach_dataset_category")
+            upload_dataset = st.file_uploader(
+                "Upload JSON dataset file",
+                type=["json"],
+                key="teach_dataset_file",
+            )
+            if st.button("Upload Dataset", key="teach_dataset_btn", use_container_width=True):
+                if upload_dataset is None:
+                    st.warning("Please choose a JSON dataset file.")
+                else:
+                    with st.spinner("Training from dataset..."):
+                        try:
+                            result = client.upload_dataset(
+                                file_name=upload_dataset.name,
+                                file_bytes=upload_dataset.read(),
+                                category=category_dataset,
+                            )
+                            stored = result.get("data", {}).get("total_chunks", 0)
+                            items = result.get("data", {}).get("items_ingested", 0)
+                            st.success(f"Dataset ingested ({items} items, {stored} chunks).")
+                        except APIClientError as e:
+                            st.error(str(e))
+
         with st.expander("Search Memory"):
             search_query = st.text_input("Memory query", key="memory_query")
             search_category = st.selectbox(

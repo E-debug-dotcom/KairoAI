@@ -159,6 +159,39 @@ def test_task_route_decision_memory_only(monkeypatch):
     assert "items" in body
 
 
+def test_learning_dataset_route(monkeypatch):
+    from fastapi.testclient import TestClient
+    from main import app
+    from storage.vector_store import vector_store
+    from storage.database import db
+
+    monkeypatch.setattr(
+        vector_store,
+        "add_chunks",
+        lambda chunks, source, category="general", tags=None: [f"id-{i}" for i in range(len(chunks))],
+    )
+    monkeypatch.setattr(db, "save_task", lambda *args, **kwargs: 1)
+
+    client = TestClient(app)
+    response = client.post(
+        "/api/v1/learn/dataset",
+        json={
+            "dataset_name": "security_dataset",
+            "category": "security",
+            "items": [
+                {"title": "Red Team Guide", "content": "Perform reconnaissance, enumerate services."},
+                {"title": "Automation Runbook", "content": "Automate alerts with CI/CD monitoring."},
+            ],
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "success"
+    assert body["data"]["items_ingested"] == 2
+    assert body["data"]["total_chunks"] >= 2
+
+
 def test_task_route_resume_coach_output_shape(monkeypatch):
     from fastapi.testclient import TestClient
     from main import app

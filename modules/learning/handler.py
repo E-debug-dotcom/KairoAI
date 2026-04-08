@@ -26,6 +26,7 @@ class LearningHandler:
         dispatch = {
             "teach_text": self._teach_text,
             "teach_document": self._teach_document,
+            "teach_dataset": self._teach_dataset,
             "search": self._search,
         }
         if sub_task not in dispatch:
@@ -87,6 +88,79 @@ class LearningHandler:
                 "source": filename,
                 "category": category,
             },
+        )
+
+    async def _teach_dataset(self, payload: dict) -> dict:
+        items = payload.get("items")
+        dataset_name = payload.get("dataset_name", "dataset")
+        default_category = payload.get("category", "general")
+
+        if not items or not isinstance(items, list):
+            return formatter.error(
+                "learning",
+                "Field 'items' is required and must be a list of dataset documents.",
+            )
+
+        if len(items) == 0:
+            return formatter.error("learning", "Dataset contains no items to ingest.")
+
+        start = time.time()
+        total_chunks = 0
+        summary = []
+
+        for index, item in enumerate(items):
+            if not isinstance(item, dict):
+                continue
+
+            content = (item.get("content") or item.get("text") or "").strip()
+            if not content:
+                continue
+
+            source = item.get("source") or item.get("title") or f"{dataset_name}_{index+1}"
+            category = item.get("category") or default_category or "general"
+            tags = item.get("tags", [])
+            if not isinstance(tags, list):
+                tags = [str(tags)]
+
+            chunks = self._chunk_text(content)
+            ids = vector_store.add_chunks(chunks, source=source, category=category, tags=tags)
+            total_chunks += len(ids)
+
+            summary.append(
+                {
+                    "source": source,
+                    "category": category,
+                    "stored_chunks": len(ids),
+                }
+            )
+
+        if total_chunks == 0:
+            return formatter.error(
+                "learning",
+                "No valid dataset items were ingested. Ensure each item has non-empty content.",
+            )
+
+        duration = time.time() - start
+        db.save_task(
+            task_type="learning",
+            input_summary={
+                "sub_task": "teach_dataset",
+                "dataset_name": dataset_name,
+                "items_ingested": len(summary),
+            },
+            result=formatter.success("learning", {"stored_chunks": total_chunks}),
+            duration_seconds=duration,
+        )
+
+        return formatter.success(
+            "learning",
+            {
+                "dataset_name": dataset_name,
+                "items_ingested": len(summary),
+                "total_chunks": total_chunks,
+                "summary": summary,
+            },
+            meta={"duration_seconds": round(duration, 2)},
         )
 
     async def _search(self, payload: dict) -> dict:

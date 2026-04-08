@@ -440,3 +440,43 @@
 2026-04-02 20:12:21 | WARNING  |  | core.streaming_manager | Max streaming sessions reached; removing oldest: s1
 2026-04-02 20:12:21 | ERROR    |  | core.streaming_manager | Error during streaming: Test error
 2026-04-02 20:12:21 | WARNING  |  | modules.code_gen.handler | Multi-file context retrieval failed: Vector store error
+2026-04-08 18:36:11 | INFO     |  | core.task_router | span_module_handler | task_type=job_application sub_task= handler_time_ms=0.00
+2026-04-08 18:36:11 | INFO     |  | core.task_router | span_module_handler | task_type=resume_coach sub_task= handler_time_ms=0.00
+2026-04-08 18:36:11 | WARNING  |  | storage.vector_store | span_vector_store | operation=query top_k=5 n_results=0 latency_ms=0.02 invalid_collection_error=collection has insufficient records
+2026-04-08 18:36:11 | INFO     |  | storage.vector_store | span_vector_store_agg | operation=query n_results=0 latency_ms=0.02
+2026-04-08 18:36:11 | INFO     | test-request-id-123 | main | route_span | method=GET path=/health request_id=test-request-id-123 latency_ms=29.34
+2026-04-08 18:36:11 | ERROR    |  | core.llm_service | Unexpected LLM error on attempt 1: Invalid type for url.  Expected str or httpx.URL, got <class 'tuple'>: (b'http', b'localhost', 11434, b'/api/generate')
+2026-04-08 18:36:12 | ERROR    |  | core.llm_service | Unexpected LLM error on attempt 2: Invalid type for url.  Expected str or httpx.URL, got <class 'tuple'>: (b'http', b'localhost', 11434, b'/api/generate')
+2026-04-08 18:36:13 | ERROR    |  | core.llm_service | Unexpected LLM error on attempt 3: Invalid type for url.  Expected str or httpx.URL, got <class 'tuple'>: (b'http', b'localhost', 11434, b'/api/generate')
+2026-04-08 18:36:13 | INFO     |  | span | span_test_span | test_key=value duration_ms=10.08
+2026-04-08 18:36:13 | INFO     |  | span | span_test_span_agg | test_key=value duration_ms=10.08
+2026-04-08 18:36:13 | INFO     |  | core.decision_engine | span_decision_engine_agg | decision_type=memory_only memory_score=0.950 latency_ms=0.05
+2026-04-08 18:36:13 | INFO     | d557849c-f6a5-4b18-a246-55eec51a60b8 | core.decision_engine | span_decision_engine_agg | decision_type=memory_only memory_score=0.900 latency_ms=0.05
+2026-04-08 18:36:13 | INFO     | d557849c-f6a5-4b18-a246-55eec51a60b8 | main | route_span | method=POST path=/api/v1/task/ request_id=d557849c-f6a5-4b18-a246-55eec51a60b8 latency_ms=2.56
+2026-04-08 18:36:13 | INFO     | 89cdb02b-4ab5-4a21-86c4-7430946af6e6 | main | route_span | method=POST path=/api/v1/learn/dataset request_id=89cdb02b-4ab5-4a21-86c4-7430946af6e6 latency_ms=2.03
+2026-04-08 18:36:13 | INFO     |  | main | ============================================================
+2026-04-08 18:36:13 | INFO     |  | main | Starting LocalAI System v1.0.0
+2026-04-08 18:36:13 | INFO     |  | main | ============================================================
+2026-04-08 18:36:13 | INFO     |  | storage.database | Database initialized at: sqlite:///./ai_system.db
+2026-04-08 18:36:13 | INFO     |  | main | Prompt templates registered
+2026-04-08 18:36:13 | INFO     |  | main | Task router registered modules: ['assistant', 'code', 'job_application', 'learning', 'resume', 'resume_coach']
+2026-04-08 18:36:13 | INFO     |  | main | Tool registry loaded: ['assistant', 'code_gen', 'job_application', 'learning', 'resume_coach']
+2026-04-08 18:36:14 | INFO     |  | storage.vector_store | Vector store initialized at ./vector_db (collection=kairo_memory)
+2026-04-08 18:36:14 | WARNING  |  | main | Ollama is NOT reachable at http://localhost:11434. Start it with: ollama serve
+2026-04-08 18:36:14 | INFO     |  | main | System ready. API running at http://0.0.0.0:8000/api/v1
+2026-04-08 18:36:14 | INFO     | 0d52c55d-fb35-49af-bfef-79ca4c395eda | core.decision_engine | span_decision_engine_agg | decision_type=llm_only memory_score=0.000 latency_ms=0.03
+2026-04-08 18:36:14 | INFO     | 0d52c55d-fb35-49af-bfef-79ca4c395eda | modules.resume_coach.handler | ResumeCoach module handling sub_task='review'
+2026-04-08 18:36:14 | INFO     | 0d52c55d-fb35-49af-bfef-79ca4c395eda | analysis.engine | Running full resume analysis
+2026-04-08 18:36:17 | INFO     | 0d52c55d-fb35-49af-bfef-79ca4c395eda | analysis.engine | span_analysis_aggregate | tfidf_time_ms=3076.44 similarity_time_ms=232.08
+2026-04-08 18:36:17 | INFO     | 0d52c55d-fb35-49af-bfef-79ca4c395eda | prompts.prompt_manager | span_prompt_render_agg | template_key=resume_coach::review render_time_ms=0.00
+2026-04-08 18:36:17 | INFO     | 0d52c55d-fb35-49af-bfef-79ca4c395eda | storage.database | span_db_write_agg | table=task_records write_time_ms=21.88
+2026-04-08 18:36:17 | INFO     | 0d52c55d-fb35-49af-bfef-79ca4c395eda | core.task_router | span_module_handler | task_type=resume_coach sub_task= handler_time_ms=3332.72
+2026-04-08 18:36:17 | INFO     | 0d52c55d-fb35-49af-bfef-79ca4c395eda | main | route_span | method=POST path=/api/v1/task/ request_id=0d52c55d-fb35-49af-bfef-79ca4c395eda latency_ms=3334.09
+2026-04-08 18:36:17 | INFO     |  | main | Shutting down LocalAI System
+2026-04-08 18:36:17 | INFO     | 4258f58e-79b1-4d84-bb63-cce44385c9f0 | modules.resume_coach.handler | ResumeCoach module handling sub_task='review'
+2026-04-08 18:36:17 | INFO     | 4258f58e-79b1-4d84-bb63-cce44385c9f0 | analysis.engine | Running full resume analysis
+2026-04-08 18:36:17 | INFO     | 4258f58e-79b1-4d84-bb63-cce44385c9f0 | analysis.engine | span_analysis_aggregate | tfidf_time_ms=1.65 similarity_time_ms=2.71
+2026-04-08 18:36:17 | INFO     | 4258f58e-79b1-4d84-bb63-cce44385c9f0 | prompts.prompt_manager | span_prompt_render_agg | template_key=resume_coach::review render_time_ms=0.01
+2026-04-08 18:36:17 | INFO     | 4258f58e-79b1-4d84-bb63-cce44385c9f0 | storage.database | span_db_write_agg | table=task_records write_time_ms=5.30
+2026-04-08 18:36:17 | INFO     | 4258f58e-79b1-4d84-bb63-cce44385c9f0 | main | route_span | method=POST path=/api/v1/resume_coach/review request_id=4258f58e-79b1-4d84-bb63-cce44385c9f0 latency_ms=13.67
+2026-04-08 18:36:30 | INFO     | c1bafae2-aa65-4ec7-bb8f-5ac5747ebf12 | main | route_span | method=POST path=/api/v1/learn/dataset request_id=c1bafae2-aa65-4ec7-bb8f-5ac5747ebf12 latency_ms=2.14

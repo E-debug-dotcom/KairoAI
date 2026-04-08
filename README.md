@@ -168,6 +168,35 @@ curl -X POST http://localhost:8000/api/v1/learn/text \
   }'
 ```
 
+### Train on a task dataset
+
+```bash
+curl -X POST http://localhost:8000/api/v1/learn/dataset \
+  -H "Content-Type: application/json" \
+  -d '{
+    "dataset_name": "security_red_team_automation",
+    "category": "security",
+    "items": [
+      {
+        "title": "Red Team Tactics",
+        "content": "Use reconnaissance, vulnerability scanning, and controlled exploitation in scope.",
+        "tags": ["red-teaming", "security"]
+      },
+      {
+        "title": "Automation Runbook",
+        "content": "Deploy automated defenses and CI/CD compliance checks for cloud automation.",
+        "tags": ["automation", "devops"]
+      }
+    ]
+  }'
+```
+
+```bash
+curl -X POST http://localhost:8000/api/v1/learn/dataset/upload \
+  -F "file=@dataset.json" \
+  -F "category=security"
+```
+
 ### Ask memory-grounded chat questions
 
 ```bash

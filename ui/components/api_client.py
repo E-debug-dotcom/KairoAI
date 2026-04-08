@@ -45,6 +45,14 @@ class APIClient:
             category=category,
         )
 
+    def upload_dataset(self, file_name: str, file_bytes: bytes, category: str = "general") -> dict[str, Any]:
+        return self._post_file(
+            "/api/v1/learn/dataset/upload",
+            file_name=file_name,
+            file_bytes=file_bytes,
+            category=category,
+        )
+
     def search_memory(self, query: str, category: Optional[str] = None, top_k: int = 5) -> dict[str, Any]:
         payload = {
             "query": query,
