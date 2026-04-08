@@ -1,0 +1,24 @@
+{
+  "dataset_name": "security_red_team_automation",
+  "category": "security",
+  "items": [
+    {
+      "title": "Red Team Reconnaissance",
+      "content": "Begin every engagement with reconnaissance. Identify exposed services, open ports, known vulnerabilities, and user enumeration paths before attempting exploitation.",
+      "source": "red_team_playbook",
+      "tags": ["red-teaming", "recon", "security"]
+    },
+    {
+      "title": "Automation for Incident Response",
+      "content": "Use automation pipelines to collect alerts, triage incidents, and escalate high-risk events. Implement dashboards, automated ticket creation, and response playbooks for consistent handling.",
+      "source": "automation_runbook",
+      "tags": ["automation", "incident-response", "security"]
+    },
+    {
+      "title": "Secure DevOps Workflow",
+      "content": "Integrate security checks into CI/CD. Automate dependency scanning, secret detection, and infrastructure drift analysis while enforcing standard deployment policies.",
+      "source": "devops_security",
+      "tags": ["devops", "automation", "security"]
+    }
+  ]
+}

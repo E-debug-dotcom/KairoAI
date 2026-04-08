@@ -197,6 +197,20 @@ curl -X POST http://localhost:8000/api/v1/learn/dataset/upload \
   -F "category=security"
 ```
 
+### Bulk training from local dataset files
+
+Use the helper script to ingest a JSON dataset file or a directory of JSON dataset files directly into the learning memory store.
+
+```bash
+python modules/learning/dataset_trainer.py examples/security_red_team_dataset.json
+```
+
+For directories:
+
+```bash
+python modules/learning/dataset_trainer.py examples/datasets/
+```
+
 ### Ask memory-grounded chat questions
 
 ```bash

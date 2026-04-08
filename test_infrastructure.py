@@ -192,6 +192,19 @@ def test_learning_dataset_route(monkeypatch):
     assert body["data"]["total_chunks"] >= 2
 
 
+def test_load_json_dataset_from_file():
+    from modules.learning.dataset_trainer import load_json_dataset
+    from pathlib import Path
+
+    sample_path = Path("examples/security_red_team_dataset.json")
+    dataset = load_json_dataset(str(sample_path))
+
+    assert dataset.dataset_name == "security_red_team_automation"
+    assert dataset.category == "security"
+    assert len(dataset.items) == 3
+    assert dataset.items[0].source == "red_team_playbook"
+
+
 def test_task_route_resume_coach_output_shape(monkeypatch):
     from fastapi.testclient import TestClient
     from main import app

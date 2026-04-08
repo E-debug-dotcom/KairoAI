@@ -480,3 +480,4 @@
 2026-04-08 18:36:17 | INFO     | 4258f58e-79b1-4d84-bb63-cce44385c9f0 | storage.database | span_db_write_agg | table=task_records write_time_ms=5.30
 2026-04-08 18:36:17 | INFO     | 4258f58e-79b1-4d84-bb63-cce44385c9f0 | main | route_span | method=POST path=/api/v1/resume_coach/review request_id=4258f58e-79b1-4d84-bb63-cce44385c9f0 latency_ms=13.67
 2026-04-08 18:36:30 | INFO     | c1bafae2-aa65-4ec7-bb8f-5ac5747ebf12 | main | route_span | method=POST path=/api/v1/learn/dataset request_id=c1bafae2-aa65-4ec7-bb8f-5ac5747ebf12 latency_ms=2.14
+2026-04-08 18:40:44 | INFO     | 17767572-8173-4261-94b3-d076b43d7e59 | main | route_span | method=POST path=/api/v1/learn/dataset request_id=17767572-8173-4261-94b3-d076b43d7e59 latency_ms=1.98
